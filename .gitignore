@@ -1,0 +1,7 @@
+*.class
+*.log
+target/
+.idea/
+test-output/
+_site/
+.bsp/
