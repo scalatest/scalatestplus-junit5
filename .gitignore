@@ -5,3 +5,5 @@ target/
 test-output/
 _site/
 .bsp/
+build/
+.gradle/
