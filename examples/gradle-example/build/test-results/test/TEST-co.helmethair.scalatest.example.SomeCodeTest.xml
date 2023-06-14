@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="co.helmethair.scalatest.example.SomeCodeTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2023-06-14T02:58:00" hostname="cheeseng-RAVEN" time="0.004">
+  <properties/>
+  <testcase name="someFunc in SomeCode returns '0' for 0 input" classname="co.helmethair.scalatest.example.SomeCodeTest" time="0.002"/>
+  <testcase name="someFunc in SomeCode calculates square" classname="co.helmethair.scalatest.example.SomeCodeTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[>>>>> CustomListener: execution STARTED: someFunc in SomeCode returns '0' for 0 input
+>>>>> CustomListener: execution FINISHED: someFunc in SomeCode returns '0' for 0 input with result: SUCCESSFUL
+>>>>> CustomListener: execution STARTED: someFunc in SomeCode calculates square
+>>>>> CustomListener: execution FINISHED: someFunc in SomeCode calculates square with result: SUCCESSFUL
+>>>>> CustomListener: execution FINISHED: co.helmethair.scalatest.example.SomeCodeTest with result: SUCCESSFUL
+]]></system-err>
+</testsuite>
