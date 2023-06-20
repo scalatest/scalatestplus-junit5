@@ -17,7 +17,7 @@ package org.scalatestplus.junit5
 
 import org.junit.jupiter.api.ClassDescriptor
 import org.junit.platform.commons.support.ReflectionSupport
-import org.junit.platform.engine.discovery.{ClassSelector, ClasspathRootSelector, FileSelector, PackageSelector}
+import org.junit.platform.engine.discovery.{ClassSelector, ClasspathRootSelector, FileSelector, PackageSelector, UniqueIdSelector}
 import org.junit.platform.engine.support.descriptor.EngineDescriptor
 import org.junit.platform.engine.{EngineDiscoveryRequest, ExecutionRequest, TestDescriptor, TestExecutionResult, UniqueId}
 import org.scalatest.{Args, ConfigMap, Filter, Stopper, Tracker}
@@ -76,6 +76,27 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
       discoveryRequest.getSelectorsByType(classOf[ClassSelector]).asScala.foreach { selector =>
         if (classOf[org.scalatest.Suite].isAssignableFrom(selector.getJavaClass))
           engineDesc.addChild(new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, selector.getJavaClass.getName), selector.getJavaClass))
+      }
+
+      discoveryRequest.getSelectorsByType(classOf[UniqueIdSelector]).asScala.foreach { selector =>
+        selector.getUniqueId.getSegments.asScala.toList match {
+          case _ :: secondLast :: last :: Nil if last.getType == "test" && secondLast.getType == ScalaTestClassDescriptor.segmentType =>
+            val suiteClassName = secondLast.getValue
+            val suiteClass = Class.forName(suiteClassName)
+            if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)) {
+              val clsDesc = new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClassName), suiteClass)
+              clsDesc.addChild(new ScalaTestDescriptor(clsDesc.theUniqueId.append("test", "anom"), "anom"))
+              engineDesc.addChild(clsDesc)
+            }
+
+          case _ :: last :: Nil if last.getType == ScalaTestClassDescriptor.segmentType =>
+            val suiteClassName = last.getValue
+            val suiteClass = Class.forName(suiteClassName)
+            if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass))
+              engineDesc.addChild(new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClassName), suiteClass))
+
+          case _ =>
+        }
       }
 
       logger.info("Completed test discovery, discovered suite count: " + engineDesc.getChildren.size())
