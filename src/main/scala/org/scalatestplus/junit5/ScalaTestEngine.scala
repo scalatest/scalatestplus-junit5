@@ -20,10 +20,11 @@ import org.junit.platform.commons.support.ReflectionSupport
 import org.junit.platform.engine.discovery.{ClassSelector, ClasspathRootSelector, FileSelector, PackageSelector, UniqueIdSelector}
 import org.junit.platform.engine.support.descriptor.EngineDescriptor
 import org.junit.platform.engine.{EngineDiscoveryRequest, ExecutionRequest, TestDescriptor, TestExecutionResult, UniqueId}
-import org.scalatest.{Args, ConfigMap, Filter, Stopper, Tracker}
+import org.scalatest.{Args, ConfigMap, Filter, Stopper, Tracker, DynaTags}
 
 import scala.collection.JavaConverters._
 import java.util.logging.Logger
+import scala.reflect.NameTransformer
 
 /**
  * ScalaTest implementation for JUnit 5 Test Engine.
@@ -137,10 +138,35 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
             val suiteToRun = suiteClass.newInstance.asInstanceOf[org.scalatest.Suite]
 
             val reporter = new EngineExecutionListenerReporter(listener, clzDesc, engineDesc)
-            
-            suiteToRun.run(None, Args(reporter,
-              Stopper.default, Filter(), ConfigMap.empty, None,
-              new Tracker, Set.empty))
+
+            val children = clzDesc.getChildren.asScala
+
+            children.headOption match {
+              case Some(head: ScalaTestDescriptor) if head.getDisplayName != "scalatest-all-tests" =>
+                val SelectedTag = "Selected"
+                val SelectedSet = Set(SelectedTag)
+                val testNames = suiteToRun.testNames
+                val desiredTests: Set[String] =
+                  head.getChildren.asScala.map(_.getDisplayName).filter { tn =>
+                    testNames.contains(tn) || testNames.contains(NameTransformer.decode(tn))
+                  }.toSet
+                val taggedTests: Map[String, Set[String]] = desiredTests.map(_ -> SelectedSet).toMap
+                val suiteId = suiteToRun.suiteId
+                val filter =
+                  Filter(
+                    tagsToInclude = Some(SelectedSet),
+                    excludeNestedSuites = true,
+                    dynaTags = DynaTags(Map.empty, Map(suiteId -> taggedTests))
+                  )
+                suiteToRun.run(None, Args(reporter,
+                  Stopper.default, filter, ConfigMap.empty, None,
+                  new Tracker, Set.empty))
+
+              case _ =>
+                suiteToRun.run(None, Args(reporter,
+                  Stopper.default, Filter(), ConfigMap.empty, None,
+                  new Tracker, Set.empty))
+            }
 
             listener.executionFinished(clzDesc, TestExecutionResult.successful())
 
