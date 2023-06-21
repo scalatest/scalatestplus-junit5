@@ -63,29 +63,18 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
       discoveryRequest.getSelectorsByType(classOf[ClasspathRootSelector]).asScala.foreach { selector =>
         ReflectionSupport.findAllClassesInClasspathRoot(selector.getClasspathRoot, isSuitePredicate, alwaysTruePredicate)
           .asScala
-          .map { aClass =>
-            val clsDesc = new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName), aClass)
-            clsDesc.addChild(new ScalaTestDescriptor(clsDesc.theUniqueId.append("test", "scalatest-all-tests"), "scalatest-all-tests"))
-            clsDesc
-          }.foreach(engineDesc.addChild _)
+          .map(aClass => new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName), aClass)).foreach(engineDesc.addChild _)
       }
 
       discoveryRequest.getSelectorsByType(classOf[PackageSelector]).asScala.foreach { selector =>
         ReflectionSupport.findAllClassesInPackage(selector.getPackageName(), isSuitePredicate, alwaysTruePredicate)
           .asScala
-          .map { aClass =>
-            val clsDesc = new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName), aClass)
-            clsDesc.addChild(new ScalaTestDescriptor(clsDesc.theUniqueId.append("test", "scalatest-all-tests"), "scalatest-all-tests"))
-            clsDesc
-          }.foreach(engineDesc.addChild _)
+          .map(aClass => new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName), aClass)).foreach(engineDesc.addChild _)
       }
 
       discoveryRequest.getSelectorsByType(classOf[ClassSelector]).asScala.foreach { selector =>
-        if (classOf[org.scalatest.Suite].isAssignableFrom(selector.getJavaClass)) {
-          val clsDesc = new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, selector.getJavaClass.getName), selector.getJavaClass)
-          clsDesc.addChild(new ScalaTestDescriptor(clsDesc.theUniqueId.append("test", "scalatest-all-tests"), "scalatest-all-tests"))
-          engineDesc.addChild(clsDesc)
-        }
+        if (classOf[org.scalatest.Suite].isAssignableFrom(selector.getJavaClass))
+          engineDesc.addChild(new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, selector.getJavaClass.getName), selector.getJavaClass))
       }
 
       discoveryRequest.getSelectorsByType(classOf[UniqueIdSelector]).asScala.foreach { selector =>
@@ -102,11 +91,8 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
           case engineSeg :: suiteSeg :: Nil if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
             val suiteClassName = suiteSeg.getValue
             val suiteClass = Class.forName(suiteClassName)
-            if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)) {
-              val clsDesc = new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClassName), suiteClass)
-              clsDesc.addChild(new ScalaTestDescriptor(clsDesc.theUniqueId.append("test", "scalatest-all-tests"), "scalatest-all-tests"))
-              engineDesc.addChild(clsDesc)
-            }
+            if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass))
+              engineDesc.addChild(new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClassName), suiteClass))
 
           case _ =>
         }

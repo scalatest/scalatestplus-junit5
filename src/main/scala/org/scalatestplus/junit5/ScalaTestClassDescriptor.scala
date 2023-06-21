@@ -32,6 +32,8 @@ class ScalaTestClassDescriptor(parent: TestDescriptor, val theUniqueId: UniqueId
    * @return <code>TestDescriptor.Type.CONTAINER</code>
    */
   override def getType: TestDescriptor.Type = TestDescriptor.Type.CONTAINER
+
+  override def mayRegisterTests(): Boolean = true
 }
 
 object ScalaTestClassDescriptor {
