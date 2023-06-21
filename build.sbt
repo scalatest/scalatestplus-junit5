@@ -5,7 +5,7 @@ name := "junit-5.9"
 
 organization := "org.scalatestplus"
 
-version := "3.2.16.0-M1"
+version := "3.2.16.0-M2"
 
 homepage := Some(url("https://github.com/scalatest/scalatestplus-junit"))
 

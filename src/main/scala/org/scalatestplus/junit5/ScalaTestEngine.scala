@@ -80,17 +80,17 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
 
       discoveryRequest.getSelectorsByType(classOf[UniqueIdSelector]).asScala.foreach { selector =>
         selector.getUniqueId.getSegments.asScala.toList match {
-          case _ :: secondLast :: last :: Nil if last.getType == "test" && secondLast.getType == ScalaTestClassDescriptor.segmentType =>
-            val suiteClassName = secondLast.getValue
+          case engineSeg :: suiteSeg :: testSeg :: Nil if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && testSeg.getType == "test" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
+            val suiteClassName = suiteSeg.getValue
             val suiteClass = Class.forName(suiteClassName)
             if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)) {
               val clsDesc = new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClassName), suiteClass)
-              clsDesc.addChild(new ScalaTestDescriptor(clsDesc.theUniqueId.append("test", "anom"), "anom"))
+              clsDesc.addChild(new ScalaTestDescriptor(clsDesc.theUniqueId.append("test", testSeg.getValue), testSeg.getValue))
               engineDesc.addChild(clsDesc)
             }
 
-          case _ :: last :: Nil if last.getType == ScalaTestClassDescriptor.segmentType =>
-            val suiteClassName = last.getValue
+          case engineSeg :: suiteSeg :: Nil if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
+            val suiteClassName = suiteSeg.getValue
             val suiteClass = Class.forName(suiteClassName)
             if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass))
               engineDesc.addChild(new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClassName), suiteClass))
