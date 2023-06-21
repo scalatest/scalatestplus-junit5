@@ -122,37 +122,32 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
             val canInstantiate = JUnitHelper.checkForPublicNoArgConstructor(suiteClass) && classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)
             require(canInstantiate, "Must pass an org.scalatest.Suite with a public no-arg constructor")
             val suiteToRun = suiteClass.newInstance.asInstanceOf[org.scalatest.Suite]
-
             val reporter = new EngineExecutionListenerReporter(listener, clzDesc, engineDesc)
-
             val children = clzDesc.getChildren.asScala
 
-            children.headOption match {
-              case Some(head: ScalaTestDescriptor) if head.getDisplayName != "scalatest-all-tests" =>
+            val filter =
+              if (children.isEmpty)
+                Filter()
+              else {
                 val SelectedTag = "Selected"
                 val SelectedSet = Set(SelectedTag)
                 val testNames = suiteToRun.testNames
                 val desiredTests: Set[String] =
-                  head.getChildren.asScala.map(_.getDisplayName).filter { tn =>
+                  children.map(_.getDisplayName).filter { tn =>
                     testNames.contains(tn) || testNames.contains(NameTransformer.decode(tn))
                   }.toSet
                 val taggedTests: Map[String, Set[String]] = desiredTests.map(_ -> SelectedSet).toMap
                 val suiteId = suiteToRun.suiteId
-                val filter =
                   Filter(
                     tagsToInclude = Some(SelectedSet),
                     excludeNestedSuites = true,
                     dynaTags = DynaTags(Map.empty, Map(suiteId -> taggedTests))
                   )
-                suiteToRun.run(None, Args(reporter,
-                  Stopper.default, filter, ConfigMap.empty, None,
-                  new Tracker, Set.empty))
+              }
 
-              case _ =>
-                suiteToRun.run(None, Args(reporter,
-                  Stopper.default, Filter(), ConfigMap.empty, None,
-                  new Tracker, Set.empty))
-            }
+            suiteToRun.run(None, Args(reporter,
+              Stopper.default, filter, ConfigMap.empty, None,
+              new Tracker, Set.empty))
 
             listener.executionFinished(clzDesc, TestExecutionResult.successful())
 
