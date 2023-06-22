@@ -5,7 +5,7 @@ name := "junit-5.9"
 
 organization := "org.scalatestplus"
 
-version := "3.2.16.0-M2"
+version := "3.2.16.0-M3"
 
 homepage := Some(url("https://github.com/scalatest/scalatestplus-junit"))
 
@@ -29,9 +29,9 @@ developers := List(
 scalaVersion := "2.13.11"
 
 crossScalaVersions := List(
-  "2.10.7", 
-  "2.11.12", 
-  "2.12.18", 
+  //"2.10.7",
+  //"2.11.12",
+  //"2.12.18",
   "2.13.11", 
   "3.1.3"
 )

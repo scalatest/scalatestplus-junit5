@@ -17,13 +17,20 @@ package org.scalatestplus.junit5
 
 import org.junit.jupiter.api.ClassDescriptor
 import org.junit.platform.commons.support.ReflectionSupport
+import org.junit.platform.engine.TestDescriptor.Visitor
 import org.junit.platform.engine.discovery.{ClassSelector, ClasspathRootSelector, FileSelector, PackageSelector, UniqueIdSelector}
 import org.junit.platform.engine.support.descriptor.EngineDescriptor
+import org.junit.platform.engine.support.discovery.EngineDiscoveryRequestResolver.InitializationContext
+import org.junit.platform.engine.support.discovery.SelectorResolver.{Context, Match, Resolution}
+import org.junit.platform.engine.support.discovery.{EngineDiscoveryRequestResolver, SelectorResolver}
 import org.junit.platform.engine.{EngineDiscoveryRequest, ExecutionRequest, TestDescriptor, TestExecutionResult, UniqueId}
-import org.scalatest.{Args, ConfigMap, Filter, Stopper, Tracker, DynaTags}
+import org.scalatest.{Args, ConfigMap, DynaTags, Filter, Stopper, Tracker}
 
-import scala.collection.JavaConverters._
+import java.util.Optional
+import java.util.function.Supplier
 import java.util.logging.Logger
+import scala.jdk.CollectionConverters._
+import scala.jdk.OptionConverters._
 import scala.reflect.NameTransformer
 
 /**
@@ -60,43 +67,127 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
           def test(t: Class[_]): Boolean = classOf[org.scalatest.Suite].isAssignableFrom(t)
         }
 
-      discoveryRequest.getSelectorsByType(classOf[ClasspathRootSelector]).asScala.foreach { selector =>
-        ReflectionSupport.findAllClassesInClasspathRoot(selector.getClasspathRoot, isSuitePredicate, alwaysTruePredicate)
-          .asScala
-          .map(aClass => new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName), aClass)).foreach(engineDesc.addChild _)
-      }
+      val classSelectorResolver = new SelectorResolver {
 
-      discoveryRequest.getSelectorsByType(classOf[PackageSelector]).asScala.foreach { selector =>
-        ReflectionSupport.findAllClassesInPackage(selector.getPackageName(), isSuitePredicate, alwaysTruePredicate)
-          .asScala
-          .map(aClass => new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName), aClass)).foreach(engineDesc.addChild _)
-      }
+        override def resolve(selector: ClasspathRootSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
+          val matches =
+            ReflectionSupport.findAllClassesInClasspathRoot(selector.getClasspathRoot, isSuitePredicate, alwaysTruePredicate)
+              .asScala
+              .flatMap { aClass =>
+                context.addToParent((parent: TestDescriptor) => {
+                  val suiteUniqueId = parent.getUniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName)
+                  parent.getChildren.asScala.find(_.getUniqueId == suiteUniqueId) match {
+                    case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
+                    case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, aClass))
+                  }
+                }).map { it =>
+                  Match.exact(it)
+                }.toScala
+              }.toSet
+          Resolution.matches(matches.asJava)
+        }
 
-      discoveryRequest.getSelectorsByType(classOf[ClassSelector]).asScala.foreach { selector =>
-        if (classOf[org.scalatest.Suite].isAssignableFrom(selector.getJavaClass))
-          engineDesc.addChild(new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, selector.getJavaClass.getName), selector.getJavaClass))
-      }
+        override def resolve(selector: PackageSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
+          val matches =
+            ReflectionSupport.findAllClassesInPackage(selector.getPackageName, isSuitePredicate, alwaysTruePredicate)
+              .asScala
+              .flatMap { aClass =>
+                context.addToParent((parent: TestDescriptor) => {
+                  val suiteUniqueId = parent.getUniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName)
+                  parent.getChildren.asScala.find(_.getUniqueId == suiteUniqueId) match {
+                    case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
+                    case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, aClass))
+                  }
+                }).map { it =>
+                  Match.exact(it)
+                }.toScala
+              }.toSet
+          Resolution.matches(matches.asJava)
+        }
 
-      discoveryRequest.getSelectorsByType(classOf[UniqueIdSelector]).asScala.foreach { selector =>
-        selector.getUniqueId.getSegments.asScala.toList match {
-          case engineSeg :: suiteSeg :: testSeg :: Nil if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && testSeg.getType == "test" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
-            val suiteClassName = suiteSeg.getValue
-            val suiteClass = Class.forName(suiteClassName)
-            if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)) {
-              val clsDesc = new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClassName), suiteClass)
-              clsDesc.addChild(new ScalaTestDescriptor(clsDesc.theUniqueId.append("test", testSeg.getValue), testSeg.getValue))
-              engineDesc.addChild(clsDesc)
-            }
-
-          case engineSeg :: suiteSeg :: Nil if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
-            val suiteClassName = suiteSeg.getValue
-            val suiteClass = Class.forName(suiteClassName)
-            if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass))
-              engineDesc.addChild(new ScalaTestClassDescriptor(engineDesc, uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClassName), suiteClass))
-
-          case _ =>
+        override def resolve(selector: ClassSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
+          val testClass = selector.getJavaClass
+          if (isSuitePredicate.test(testClass)) {
+            context.addToParent((parent: TestDescriptor) => {
+              val suiteUniqueId = parent.getUniqueId.append(ScalaTestClassDescriptor.segmentType, testClass.getName)
+              parent.getChildren.asScala.find(_.getUniqueId == suiteUniqueId) match {
+                case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
+                case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, testClass))
+              }
+            }).map { it =>
+              Resolution.`match`(Match.exact(it))
+            }.orElse(Resolution.unresolved())
+          }
+          else
+            Resolution.unresolved()
         }
       }
+
+      val uniqueIdSelectorResolver = new SelectorResolver {
+        override def resolve(selector: UniqueIdSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
+          selector.getUniqueId.getSegments.asScala.toList match {
+            case engineSeg :: suiteSeg :: testSeg :: Nil if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && testSeg.getType == "test" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
+              val suiteClassName = suiteSeg.getValue
+              val suiteClass = Class.forName(suiteClassName)
+              if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)) {
+                context.addToParent((parent: TestDescriptor) => {
+                  val children = parent.getChildren.asScala
+                  val suiteUniqueId = uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClass.getName)
+                  val testUniqueId = suiteUniqueId.append("test", testSeg.getValue)
+                  val testDesc = new ScalaTestDescriptor(testUniqueId, testSeg.getValue)
+                  val (suiteDesc, result) =
+                    children.find(_.getUniqueId == suiteUniqueId) match {
+                      case Some(suiteDesc) =>
+                        (suiteDesc, Optional.empty[ScalaTestClassDescriptor]())
+
+                      case None =>
+                        val suiteDesc = new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass)
+                        (suiteDesc, Optional.of(suiteDesc))
+                    }
+
+                  suiteDesc.getChildren.asScala.find(_.getUniqueId == testUniqueId) match {
+                    case Some(_) => // Do nothing if the test already exists
+                    case None => suiteDesc.addChild(testDesc)
+                  }
+
+                  result
+                }).map { it =>
+                  Resolution.`match`(Match.exact(it))
+                }.orElse(Resolution.unresolved())
+              }
+              else
+                Resolution.unresolved()
+
+            case engineSeg :: suiteSeg :: Nil if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
+              val suiteClassName = suiteSeg.getValue
+              val suiteClass = Class.forName(suiteClassName)
+              if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)) {
+                context.addToParent((parent: TestDescriptor) => {
+                  val children = parent.getChildren.asScala
+                  val suiteUniqueId = uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClass.getName)
+                  children.find(_.getUniqueId == suiteUniqueId) match {
+                    case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
+                    case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass))
+                  }
+                }).map { it =>
+                  Resolution.`match`(Match.exact(it))
+                }.orElse(Resolution.unresolved())
+              }
+              else
+                Resolution.unresolved()
+
+            case _ => Resolution.unresolved()
+          }
+        }
+      }
+
+      val resolver = EngineDiscoveryRequestResolver.builder[EngineDescriptor]()
+                     .addClassContainerSelectorResolver(isSuitePredicate)
+                     .addSelectorResolver(classSelectorResolver)
+                     .addSelectorResolver(uniqueIdSelectorResolver)
+                     .build()
+
+      resolver.resolve(discoveryRequest, engineDesc)
 
       logger.info("Completed test discovery, discovered suite count: " + engineDesc.getChildren.size())
     }
@@ -112,6 +203,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
       logger.info("Start tests execution...")
       val engineDesc = request.getRootTestDescriptor
       val listener = request.getEngineExecutionListener
+
       listener.executionStarted(engineDesc)
       engineDesc.getChildren.asScala.foreach { testDesc =>
         testDesc match {
