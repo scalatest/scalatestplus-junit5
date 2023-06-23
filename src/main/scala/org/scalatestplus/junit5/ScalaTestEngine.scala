@@ -29,8 +29,10 @@ import org.scalatest.{Args, ConfigMap, DynaTags, Filter, Stopper, Tracker}
 import java.util.Optional
 import java.util.function.Supplier
 import java.util.logging.Logger
-import scala.jdk.CollectionConverters._
-import scala.jdk.OptionConverters._
+import java.util.stream.Collectors
+//import scala.jdk.CollectionConverters._
+//import scala.jdk.OptionConverters._
+import scala.collection.JavaConverters._
 import scala.reflect.NameTransformer
 
 /**
@@ -72,7 +74,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
         override def resolve(selector: ClasspathRootSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
           val matches =
             ReflectionSupport.findAllClassesInClasspathRoot(selector.getClasspathRoot, isSuitePredicate, alwaysTruePredicate)
-              .asScala
+              .stream()
               .flatMap { aClass =>
                 context.addToParent((parent: TestDescriptor) => {
                   val suiteUniqueId = parent.getUniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName)
@@ -82,15 +84,15 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   }
                 }).map { it =>
                   Match.exact(it)
-                }.toScala
-              }.toSet
-          Resolution.matches(matches.asJava)
+                }.map(java.util.stream.Stream.of[Match]).orElse(java.util.stream.Stream.empty())
+              }.collect(Collectors.toSet())
+          Resolution.matches(matches)
         }
 
         override def resolve(selector: PackageSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
           val matches =
             ReflectionSupport.findAllClassesInPackage(selector.getPackageName, isSuitePredicate, alwaysTruePredicate)
-              .asScala
+              .stream()
               .flatMap { aClass =>
                 context.addToParent((parent: TestDescriptor) => {
                   val suiteUniqueId = parent.getUniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName)
@@ -100,9 +102,9 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   }
                 }).map { it =>
                   Match.exact(it)
-                }.toScala
-              }.toSet
-          Resolution.matches(matches.asJava)
+                }.map(java.util.stream.Stream.of[Match]).orElse(java.util.stream.Stream.empty())
+              }.collect(Collectors.toSet())
+          Resolution.matches(matches)
         }
 
         override def resolve(selector: ClassSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
