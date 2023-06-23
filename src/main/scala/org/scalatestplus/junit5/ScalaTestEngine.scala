@@ -18,7 +18,7 @@ package org.scalatestplus.junit5
 import org.junit.jupiter.api.ClassDescriptor
 import org.junit.platform.commons.support.ReflectionSupport
 import org.junit.platform.engine.TestDescriptor.Visitor
-import org.junit.platform.engine.discovery.{ClassSelector, ClasspathRootSelector, FileSelector, PackageSelector, UniqueIdSelector}
+import org.junit.platform.engine.discovery.{ClassSelector, ClasspathRootSelector, FileSelector, ModuleSelector, PackageSelector, UniqueIdSelector}
 import org.junit.platform.engine.support.descriptor.EngineDescriptor
 import org.junit.platform.engine.support.discovery.EngineDiscoveryRequestResolver.InitializationContext
 import org.junit.platform.engine.support.discovery.SelectorResolver.{Context, Match, Resolution}
@@ -112,6 +112,15 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
         override def resolve(selector: PackageSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
           val matches =
             ReflectionSupport.findAllClassesInPackage(selector.getPackageName, isSuitePredicate, alwaysTruePredicate)
+              .stream()
+              .flatMap(addToParentFunction(context))
+              .collect(Collectors.toSet())
+          Resolution.matches(matches)
+        }
+
+        override def resolve(selector: ModuleSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
+          val matches =
+            ReflectionSupport.findAllClassesInModule(selector.getModuleName, isSuitePredicate, alwaysTruePredicate)
               .stream()
               .flatMap(addToParentFunction(context))
               .collect(Collectors.toSet())
