@@ -82,9 +82,9 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                     case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
                     case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, aClass))
                   }
-                }).map { it =>
+                }).map[Match] { it =>
                   Match.exact(it)
-                }.map(java.util.stream.Stream.of[Match]).orElse(java.util.stream.Stream.empty())
+                }.map[java.util.stream.Stream[Match]](java.util.stream.Stream.of[Match]).orElse(java.util.stream.Stream.empty())
               }.collect(Collectors.toSet())
           Resolution.matches(matches)
         }
@@ -100,9 +100,9 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                     case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
                     case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, aClass))
                   }
-                }).map { it =>
+                }).map[Match] { it =>
                   Match.exact(it)
-                }.map(java.util.stream.Stream.of[Match]).orElse(java.util.stream.Stream.empty())
+                }.map[java.util.stream.Stream[Match]](java.util.stream.Stream.of[Match]).orElse(java.util.stream.Stream.empty())
               }.collect(Collectors.toSet())
           Resolution.matches(matches)
         }
@@ -116,7 +116,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                 case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
                 case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, testClass))
               }
-            }).map { it =>
+            }).map[Resolution] { it =>
               Resolution.`match`(Match.exact(it))
             }.orElse(Resolution.unresolved())
           }
@@ -153,7 +153,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   }
 
                   result
-                }).map { it =>
+                }).map[Resolution] { it =>
                   Resolution.`match`(Match.exact(it))
                 }.orElse(Resolution.unresolved())
               }
@@ -171,7 +171,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                     case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
                     case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass))
                   }
-                }).map { it =>
+                }).map[Resolution] { it =>
                   Resolution.`match`(Match.exact(it))
                 }.orElse(Resolution.unresolved())
               }
