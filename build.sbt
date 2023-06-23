@@ -29,12 +29,14 @@ developers := List(
 scalaVersion := "2.13.11"
 
 crossScalaVersions := List(
-  //"2.10.7",
-  //"2.11.12",
-  //"2.12.18",
+  "2.10.7",
+  "2.11.12",
+  "2.12.18",
   "2.13.11", 
   "3.1.3"
 )
+
+scalacOptions ++= Seq("-target:jvm-1.8")
 
 /** Add src/main/scala-{2|3} to Compile / unmanagedSourceDirectories */
 Compile / unmanagedSourceDirectories ++= {
