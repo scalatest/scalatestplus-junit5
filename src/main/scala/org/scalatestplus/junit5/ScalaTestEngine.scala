@@ -15,23 +15,17 @@
  */
 package org.scalatestplus.junit5
 
-import org.junit.jupiter.api.ClassDescriptor
 import org.junit.platform.commons.support.ReflectionSupport
-import org.junit.platform.engine.TestDescriptor.Visitor
-import org.junit.platform.engine.discovery.{ClassSelector, ClasspathRootSelector, FileSelector, ModuleSelector, PackageSelector, UniqueIdSelector}
+import org.junit.platform.engine.discovery.{ClassSelector, ClasspathRootSelector, ModuleSelector, PackageSelector, UniqueIdSelector}
 import org.junit.platform.engine.support.descriptor.EngineDescriptor
-import org.junit.platform.engine.support.discovery.EngineDiscoveryRequestResolver.InitializationContext
-import org.junit.platform.engine.support.discovery.SelectorResolver.{Context, Match, Resolution}
+import org.junit.platform.engine.support.discovery.SelectorResolver.{Match, Resolution}
 import org.junit.platform.engine.support.discovery.{EngineDiscoveryRequestResolver, SelectorResolver}
 import org.junit.platform.engine.{EngineDiscoveryRequest, ExecutionRequest, TestDescriptor, TestExecutionResult, UniqueId}
 import org.scalatest.{Args, ConfigMap, DynaTags, Filter, Stopper, Tracker}
 
 import java.util.Optional
-import java.util.function.Supplier
 import java.util.logging.Logger
 import java.util.stream.Collectors
-//import scala.jdk.CollectionConverters._
-//import scala.jdk.OptionConverters._
 import scala.collection.JavaConverters._
 import scala.reflect.NameTransformer
 
