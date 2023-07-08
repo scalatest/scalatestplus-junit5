@@ -158,7 +158,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                       val children = parent.getChildren.asScala
                       val suiteUniqueId = uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClass.getName)
                       val testUniqueId = suiteUniqueId.append("test", testSeg.getValue)
-                      val testDesc = new ScalaTestDescriptor(testUniqueId, testSeg.getValue)
+                      val testDesc = new ScalaTestDescriptor(testUniqueId, testSeg.getValue, None)
                       val (suiteDesc, result) =
                         children.find(_.getUniqueId == suiteUniqueId) match {
                           case Some(suiteDesc) =>

@@ -43,9 +43,9 @@ private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionL
       case None => suiteName
     }
 
-  private def createTestDescriptor(suiteId: String, suiteName: String, suiteClassName: Option[String], testName: String): ScalaTestDescriptor = {
+  private def createTestDescriptor(suiteId: String, suiteName: String, suiteClassName: Option[String], testName: String, locationOpt: Option[Location]): ScalaTestDescriptor = {
     val uniqueId = clzDesc.theUniqueId.append("test", testName)
-    new ScalaTestDescriptor(uniqueId, testName)
+    new ScalaTestDescriptor(uniqueId, testName, locationOpt)
   }
 
   override def apply(event: Event): Unit = {
@@ -53,7 +53,7 @@ private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionL
     event match {
 
       case TestStarting(ordinal, suiteName, suiteId, suiteClassName, testName, testText, formatter, location, rerunnable, payload, threadName, timeStamp) =>
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         clzDesc.addChild(testDesc)
         listener.dynamicTestRegistered(testDesc)
         listener.executionStarted(testDesc)
@@ -64,21 +64,21 @@ private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionL
             case Some(t) => t
             case None => null // Yuck. Not sure if the exception passed to new Failure can be null, but it could be given this code. Usually throwable would be defined.
           }
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         listener.executionFinished(testDesc, TestExecutionResult.failed(throwableOrNull))
 
       case TestSucceeded(ordinal, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, duration, formatter, location, rerunnable, payload, threadName, timeStamp) =>
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         listener.executionFinished(testDesc, TestExecutionResult.successful())
 
       case TestIgnored(ordinal, suiteName, suiteId, suiteClassName, testName, testText, formatter, location, payload, threadName, timeStamp) =>
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         listener.executionSkipped(testDesc, "Test ignored.")
 
       // TODO: I dont see TestCanceled here. Probably need to add it
       // Closest thing we can do with pending is report an ignored test
       case TestPending(ordinal, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, duration, formatter, location, payload, threadName, timeStamp) =>
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         listener.executionSkipped(testDesc, "Test pending.")
 
       case SuiteAborted(ordinal, message, suiteName, suiteId, suiteClassName, throwable, duration, formatter, location, rerunnable, payload, threadName, timeStamp) =>

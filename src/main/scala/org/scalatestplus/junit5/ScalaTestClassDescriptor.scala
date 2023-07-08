@@ -16,7 +16,9 @@
 package org.scalatestplus.junit5
 
 import org.junit.platform.engine.support.descriptor.{AbstractTestDescriptor, ClassSource}
-import org.junit.platform.engine.{TestDescriptor, UniqueId}
+import org.junit.platform.engine.{TestDescriptor, TestSource, UniqueId}
+
+import java.util.Optional
 
 /**
  * <code>TestDescriptor</code> for ScalaTest suite.
@@ -34,6 +36,9 @@ class ScalaTestClassDescriptor(parent: TestDescriptor, val theUniqueId: UniqueId
   override def getType: TestDescriptor.Type = TestDescriptor.Type.CONTAINER
 
   override def mayRegisterTests(): Boolean = true
+
+  override def getSource: Optional[TestSource] =
+    Optional.of(ClassSource.from(suiteClass))
 }
 
 object ScalaTestClassDescriptor {

@@ -15,8 +15,12 @@
  */
 package org.scalatestplus.junit5
 
-import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor
-import org.junit.platform.engine.{TestDescriptor, UniqueId}
+import org.junit.platform.engine.support.descriptor.{AbstractTestDescriptor, ClassSource, FilePosition, FileSource, MethodSource}
+import org.junit.platform.engine.{TestDescriptor, TestSource, UniqueId}
+import org.scalatest.events._
+
+import java.io.File
+import java.util.Optional
 
 /**
  * <code>TestDescriptor</code> for a test in ScalaTest suite.
@@ -24,11 +28,24 @@ import org.junit.platform.engine.{TestDescriptor, UniqueId}
  * @param theUniqueId The unique ID.
  * @param suiteClass The display name for this test.
  */
-class ScalaTestDescriptor(theUniqueId: UniqueId, displayName: String) extends AbstractTestDescriptor(theUniqueId, displayName) {
+class ScalaTestDescriptor(theUniqueId: UniqueId, displayName: String, locationOpt: Option[Location]) extends AbstractTestDescriptor(theUniqueId, displayName) {
   /**
    * Type of this <code>ScalaTestDescriptor</code>.
    *
    * @return <code>TestDescriptor.Type.TEST</code>
    */
   override def getType: TestDescriptor.Type = TestDescriptor.Type.TEST
+
+  override def getSource: Optional[TestSource] = {
+    Optional.ofNullable(
+      locationOpt.map { loc =>
+        loc match {
+          case TopOfClass(className) => ClassSource.from(className)
+          case TopOfMethod(className, methodId) => MethodSource.from(className, methodId)
+          case LineInFile(lineNumber: Int, fileName: String, filePathname: Option[String]) => FileSource.from(new File(filePathname.getOrElse(fileName)), FilePosition.from(lineNumber))
+          case SeeStackDepthException => ClassSource.from(theUniqueId.getSegments.get(1).getValue) // Let's just refer to the class for SeeStackDepthException
+        }
+      }.getOrElse(null)
+    )
+  }
 }

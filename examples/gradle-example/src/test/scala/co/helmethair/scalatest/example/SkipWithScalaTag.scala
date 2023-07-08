@@ -10,7 +10,7 @@ class SkipWithScalaTag extends AnyFunSpec with Matchers {
 
     }
     it("assert two") {
-
+      fail
     }
   }
 
