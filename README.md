@@ -22,6 +22,10 @@ Maven:
 </dependency>
 ```
 
+**Note on Gradle Project's Default Test Runner on IntelliJ IDEA**
+
+For Gradle project, by default IntelliJ IDEA uses Gradle's test runner to run tests, which at the time of writing does not work with `Jump to Source` feature.  You may switch to use IntelliJ IDEA's test runner by following the instructions [here](https://www.jetbrains.com/help/idea/work-with-tests-in-gradle.html#configure_gradle_test_runner).
+
 **Publishing**
 
 Please use the following commands to publish to Sonatype:
