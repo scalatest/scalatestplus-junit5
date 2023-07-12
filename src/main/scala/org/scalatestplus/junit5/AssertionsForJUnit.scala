@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2022 Artima, Inc.
+ * Copyright 2001-2023 Artima, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,6 +150,13 @@ object AssertionsForJUnit extends AssertionsForJUnit {
       Succeeded
     }
 
+    /**
+     * Assert that the passed in <code>Bool</code> is <code>true</code>, else fail with <code>TestFailedException</code>.
+     *
+     * @param bool the <code>Bool</code> to assert for
+     * @param clue optional clue to be included in <code>TestFailedException</code>'s error message when assertion failed
+     * @param pos source position
+     */
     def macroAssert(bool: Bool, clue: Any, pos: source.Position): Assertion =
       macroAssert(bool, clue, bool.prettifier, pos)
 
@@ -168,6 +175,13 @@ object AssertionsForJUnit extends AssertionsForJUnit {
       Succeeded
     }
 
+    /**
+     * Assume that the passed in <code>Bool</code> is <code>true</code>, else throw <code>TestCanceledException</code>.
+     *
+     * @param bool the <code>Bool</code> to assume for
+     * @param clue optional clue to be included in <code>TestCanceledException</code>'s error message when assertion failed
+     * @param pos source position
+     */
     def macroAssume(bool: Bool, clue: Any, pos: source.Position): Assertion =
       macroAssume(bool, clue, bool.prettifier, pos)
   }
