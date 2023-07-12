@@ -69,7 +69,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
             val suiteUniqueId = parent.getUniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName)
             parent.getChildren.asScala.find(_.getUniqueId == suiteUniqueId) match {
               case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
-              case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, aClass))
+              case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, aClass, true))
             }
           }
         }
@@ -130,7 +130,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   val suiteUniqueId = parent.getUniqueId.append(ScalaTestClassDescriptor.segmentType, testClass.getName)
                   parent.getChildren.asScala.find(_.getUniqueId == suiteUniqueId) match {
                     case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
-                    case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, testClass))
+                    case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, testClass, true))
                   }
                 }
               })
@@ -165,7 +165,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                             (suiteDesc, Optional.empty[ScalaTestClassDescriptor]())
 
                           case None =>
-                            val suiteDesc = new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass)
+                            val suiteDesc = new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass, false)
                             (suiteDesc, Optional.of(suiteDesc))
                         }
 
@@ -199,7 +199,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                       val suiteUniqueId = uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClass.getName)
                       children.find(_.getUniqueId == suiteUniqueId) match {
                         case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
-                        case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass))
+                        case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass, false))
                       }
                     }
                   }

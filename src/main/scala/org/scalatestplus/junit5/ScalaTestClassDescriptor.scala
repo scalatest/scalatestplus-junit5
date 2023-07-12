@@ -29,13 +29,20 @@ import java.util.Optional
  * @param theUniqueId The unique ID.
  * @param suiteClass The class of the ScalaTest suite.
  */
-class ScalaTestClassDescriptor(parent: TestDescriptor, val theUniqueId: UniqueId, val suiteClass: Class[_]) extends AbstractTestDescriptor(theUniqueId, suiteClass.getName, ClassSource.from(suiteClass)) {
+class ScalaTestClassDescriptor(parent: TestDescriptor, val theUniqueId: UniqueId, val suiteClass: Class[_], autoAddTestChildren: Boolean) extends AbstractTestDescriptor(theUniqueId, suiteClass.getName, ClassSource.from(suiteClass)) {
 
   lazy val suite: Suite = {
     val canInstantiate = JUnitHelper.checkForPublicNoArgConstructor(suiteClass) && classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)
     require(canInstantiate, "Must pass an org.scalatest.Suite with a public no-arg constructor")
     suiteClass.newInstance.asInstanceOf[org.scalatest.Suite]
   }
+
+  if (autoAddTestChildren)
+    suite.testNames.foreach { tn =>
+      val testUniqueId = theUniqueId.append("test", tn)
+      val testDesc = new ScalaTestDescriptor(testUniqueId, tn, None)
+      addChild(testDesc)
+    }
 
   /**
    * Type of this <code>ScalaTestClassDescriptor</code>.
