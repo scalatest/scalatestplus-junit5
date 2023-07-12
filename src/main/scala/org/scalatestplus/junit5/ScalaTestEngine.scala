@@ -21,7 +21,7 @@ import org.junit.platform.engine.support.descriptor.EngineDescriptor
 import org.junit.platform.engine.support.discovery.SelectorResolver.{Match, Resolution}
 import org.junit.platform.engine.support.discovery.{EngineDiscoveryRequestResolver, SelectorResolver}
 import org.junit.platform.engine.{EngineDiscoveryRequest, ExecutionRequest, TestDescriptor, TestExecutionResult, UniqueId}
-import org.scalatest.{Args, ConfigMap, DynaTags, Filter, Stopper, Tracker}
+import org.scalatest.{Args, ConfigMap, DynaTags, Filter, Stopper, Suite, Tracker}
 
 import java.util.Optional
 import java.util.logging.Logger
