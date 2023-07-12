@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2022 Artima, Inc.
+ * Copyright 2001-2023 Artima, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,21 @@ import org.junit.platform.engine.discovery.DiscoverySelectors.{selectClass, sele
 import collection.immutable.TreeSet
 
 /**
- * Implementation trait for class <code>JUnit5Suite</code>, which represents
+ * Implementation trait for class <code>JUnitSuite</code>, which represents
  * a suite of tests that can be run with either JUnit 5 or ScalaTest.
  *
  * <p>
- * <a href="JUnit5Suite.html"><code>JUnit5Suite</code></a> is a class, not a
+ * <a href="JUnitSuite.html"><code>JUnitSuite</code></a> is a class, not a
  * trait, to minimize compile time given there is a slight compiler overhead to
  * mixing in traits compared to extending classes. If you need to mix the
- * behavior of <code>JUnit5Suite</code> into some other class, you can use this
- * trait instead, because class <code>JUnit5Suite</code> does nothing more than
+ * behavior of <code>JUnitSuite</code> into some other class, you can use this
+ * trait instead, because class <code>JUnitSuite</code> does nothing more than
  * extend this trait.
  * </p>
  *
  * <p>
- * See the documentation of the class for a <a href="JUnit5Suite.html">detailed
- * overview of <code>JUnit5Suite</code></a>.
+ * See the documentation of the class for a <a href="JUnitSuite.html">detailed
+ * overview of <code>JUnitSuite</code></a>.
  * </p>
  *
  * @author Bill Venners
@@ -267,7 +267,7 @@ trait JUnitSuiteLike extends Suite with AssertionsForJUnit { thisSuite =>
   /**
    * Suite style name.
    *
-   * @return <code>JUnit5Suite</code>
+   * @return <code>JUnitSuite</code>
    */
-  final override val styleName: String = "JUnit5Suite"
+  final override val styleName: String = "JUnitSuite"
 }
