@@ -44,6 +44,30 @@ test {
 }
 ```
 
+Gradle (Kotlin): 
+
+```
+dependencies {
+    implementation("org.scala-lang:scala-library:2.13.11")
+
+    testImplementation("org.scalatest:scalatest_2.13:3.2.16")
+    testRuntimeOnly("org.junit.platform:junit-platform-engine:1.9.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.9.1")
+    testRuntimeOnly("org.scalatestplus:junit-5-9_2.13:3.2.16.0-M7")
+}
+
+tasks {
+    test{
+        useJUnitPlatform {
+            includeEngines("scalatest")
+            testLogging {
+                events("passed", "skipped", "failed")
+            }
+        }
+    }
+}
+```
+
 **Note on Gradle Project's Default Test Runner on IntelliJ IDEA**
 
 For Gradle project, by default IntelliJ IDEA uses Gradle's test runner to run tests, which at the time of writing does not work with `Jump to Source` feature.  You may switch to use IntelliJ IDEA's test runner by following the instructions [here](https://www.jetbrains.com/help/idea/work-with-tests-in-gradle.html#configure_gradle_test_runner).
