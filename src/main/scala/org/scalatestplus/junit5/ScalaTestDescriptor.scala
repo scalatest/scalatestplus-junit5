@@ -16,8 +16,11 @@
 package org.scalatestplus.junit5
 
 import org.junit.platform.engine.support.descriptor.{AbstractTestDescriptor, ClassSource, FilePosition, FileSource, MethodSource}
-import org.junit.platform.engine.{TestDescriptor, TestSource, UniqueId}
+import org.junit.platform.engine.{TestDescriptor, TestSource, TestTag, UniqueId}
+import org.scalatest.TagAnnotation
 import org.scalatest.events._
+
+import scala.collection.JavaConverters._
 
 import java.io.File
 import java.util.Optional
@@ -61,5 +64,20 @@ class ScalaTestDescriptor(theUniqueId: UniqueId, displayName: String, locationOp
         }
       }.getOrElse(null)
     )
+  }
+
+  override def getTags: java.util.Set[TestTag] = {
+    val parentOpt = getParent
+    if (parentOpt.isPresent) {
+      val parent = parentOpt.get()
+      if (parent.isInstanceOf[ScalaTestClassDescriptor]) {
+        val parentClassDescriptor = parent.asInstanceOf[ScalaTestClassDescriptor]
+        parentClassDescriptor.suite.tags.get(displayName).getOrElse(Set.empty).map(t => TestTag.create(t)).asJava
+      }
+      else
+        Set.empty.asJava
+    }
+    else
+      Set.empty.asJava
   }
 }

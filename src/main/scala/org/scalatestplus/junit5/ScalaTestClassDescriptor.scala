@@ -16,8 +16,10 @@
 package org.scalatestplus.junit5
 
 import org.junit.platform.engine.support.descriptor.{AbstractTestDescriptor, ClassSource}
-import org.junit.platform.engine.{TestDescriptor, TestSource, UniqueId}
+import org.junit.platform.engine.{TestDescriptor, TestSource, TestTag, UniqueId}
+import org.scalatest.{Suite, TagAnnotation}
 
+import scala.collection.JavaConverters._
 import java.util.Optional
 
 /**
@@ -27,7 +29,21 @@ import java.util.Optional
  * @param theUniqueId The unique ID.
  * @param suiteClass The class of the ScalaTest suite.
  */
-class ScalaTestClassDescriptor(parent: TestDescriptor, val theUniqueId: UniqueId, val suiteClass: Class[_]) extends AbstractTestDescriptor(theUniqueId, suiteClass.getName, ClassSource.from(suiteClass)) {
+class ScalaTestClassDescriptor(parent: TestDescriptor, val theUniqueId: UniqueId, val suiteClass: Class[_], autoAddTestChildren: Boolean) extends AbstractTestDescriptor(theUniqueId, suiteClass.getName, ClassSource.from(suiteClass)) {
+
+  lazy val suite: Suite = {
+    val canInstantiate = JUnitHelper.checkForPublicNoArgConstructor(suiteClass) && classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)
+    require(canInstantiate, "Must pass an org.scalatest.Suite with a public no-arg constructor")
+    suiteClass.newInstance.asInstanceOf[org.scalatest.Suite]
+  }
+
+  if (autoAddTestChildren)
+    suite.testNames.foreach { tn =>
+      val testUniqueId = theUniqueId.append("test", tn)
+      val testDesc = new ScalaTestDescriptor(testUniqueId, tn, None)
+      addChild(testDesc)
+    }
+
   /**
    * Type of this <code>ScalaTestClassDescriptor</code>.
    *
@@ -39,6 +55,9 @@ class ScalaTestClassDescriptor(parent: TestDescriptor, val theUniqueId: UniqueId
 
   override def getSource: Optional[TestSource] =
     Optional.of(ClassSource.from(suiteClass))
+
+  override def getTags: java.util.Set[TestTag] =
+    suiteClass.getAnnotations.filter((a) => a.annotationType.isAnnotationPresent(classOf[TagAnnotation])).map((a) => TestTag.create(a.annotationType.getName)).toSet.asJava
 }
 
 object ScalaTestClassDescriptor {
