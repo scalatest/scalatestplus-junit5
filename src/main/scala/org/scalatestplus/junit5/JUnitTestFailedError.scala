@@ -45,7 +45,7 @@ import org.scalactic.ArrayHelper.deep
  * exception, that is considered an <em>error</em> in JUnit. This class differs from
  * <a href="../exceptions/TestFailedException.html"><code>TestFailedException</code></a> in that it extends
  * <code>org.opentest4j.AssertionFailedError</code>. Instances of this class are thrown by the
- * assertions provided by <a href="AssertionsForJUnit5.html"><code>AssertionsForJUnit5</code></a>.
+ * assertions provided by <a href="AssertionsForJUnit.html"><code>AssertionsForJUnit</code></a>.
  * </p>
  *
  * <p>
@@ -129,7 +129,7 @@ class JUnitTestFailedError(
   }
 
   /**
-   * Create a <code>JUnit5TestFailedError</code> with specified stack depth and no detail message or cause.
+   * Create a <code>JUnitTestFailedError</code> with specified stack depth and no detail message or cause.
    *
    * @param failedCodeStackDepth the depth in the stack trace of this exception at which the line of test code that failed resides.
    *
@@ -137,9 +137,9 @@ class JUnitTestFailedError(
   def this(failedCodeStackDepth: Int) = this(None, None, Right(failedCodeStackDepth), None)
 
   /**
-   * Create a <code>JUnit5TestFailedError</code> with a specified stack depth and detail message.
+   * Create a <code>JUnitTestFailedError</code> with a specified stack depth and detail message.
    *
-   * @param message A detail message for this <code>JUnit5TestFailedError</code>.
+   * @param message A detail message for this <code>JUnitTestFailedError</code>.
    * @param failedCodeStackDepth the depth in the stack trace of this exception at which the line of test code that failed resides.
    *
    * @throws NullArgumentException if <code>message</code> is <code>null</code>.
@@ -156,11 +156,11 @@ class JUnitTestFailedError(
     )
 
   /**
-   * Create a <code>JUnit5TestFailedError</code> with the specified stack depth and cause.  The
+   * Create a <code>JUnitTestFailedError</code> with the specified stack depth and cause.  The
    * <code>message</code> field of this exception object will be initialized to
    * <code>if (cause.getMessage == null) "" else cause.getMessage</code>.
    *
-   * @param cause the cause, the <code>Throwable</code> that caused this <code>JUnit5TestFailedError</code> to be thrown.
+   * @param cause the cause, the <code>Throwable</code> that caused this <code>JUnitTestFailedError</code> to be thrown.
    * @param failedCodeStackDepth the depth in the stack trace of this exception at which the line of test code that failed resides.
    *
    * @throws NullArgumentException if <code>cause</code> is <code>null</code>.
@@ -177,15 +177,15 @@ class JUnitTestFailedError(
     )
 
   /**
-   * Create a <code>JUnit5TestFailedError</code> with the specified stack depth, detail
+   * Create a <code>JUnitTestFailedError</code> with the specified stack depth, detail
    * message, and cause.
    *
    * <p>Note that the detail message associated with cause is
    * <em>not</em> automatically incorporated in this throwable's detail
    * message.
    *
-   * @param message A detail message for this <code>JUnit5TestFailedError</code>.
-   * @param cause the cause, the <code>Throwable</code> that caused this <code>JUnit5TestFailedError</code> to be thrown.
+   * @param message A detail message for this <code>JUnitTestFailedError</code>.
+   * @param cause the cause, the <code>Throwable</code> that caused this <code>JUnitTestFailedError</code> to be thrown.
    * @param failedCodeStackDepth the depth in the stack trace of this exception at which the line of test code that failed resides.
    *
    * @throws NullArgumentException if either <code>message</code> or <code>cause</code> is <code>null</code>.

@@ -39,6 +39,13 @@ class ScalaTestDescriptor(theUniqueId: UniqueId, displayName: String, locationOp
    */
   override def getType: TestDescriptor.Type = TestDescriptor.Type.TEST
 
+  /**
+   * Return <code>TestSource</code> for this test.  It depends on <code>Location</code> reported from ScalaTest, if the location is <code>TopOfClass</code>,
+   * it returns a <code>ClassSource</code>.  If the location is <code>TopOfMethod</code>, it returns a <code>MethodSource</code>.  If the location is
+   * <code>LineInFile</code>, it returns a <code>FileSource</code>.  If the location is <code>SeeStackDepthException</code>, it returns a <code>ClassSource</code>.
+   *
+   * @return One of <code>TestSource</code> subclass depending on location type.
+   */
   override def getSource: Optional[TestSource] = {
     Optional.ofNullable(
       locationOpt.map { loc =>
@@ -66,6 +73,11 @@ class ScalaTestDescriptor(theUniqueId: UniqueId, displayName: String, locationOp
     )
   }
 
+  /**
+   * Get tags for this test.
+   *
+   * @return Tags for this test.
+   */
   override def getTags: java.util.Set[TestTag] = {
     val parentOpt = getParent
     if (parentOpt.isPresent) {

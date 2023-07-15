@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2022 Artima, Inc.
+ * Copyright 2001-2023 Artima, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ package org.scalatestplus.junit5;
  * methods annotated with <code>Before</code> and <code>After</code>. For example:
  *
  * <pre class="stHighlight">
- * import org.scalatest.junit.JUnit5Suite
+ * import org.scalatest.junit5.JUnitSuite
  * import scala.collection.mutable.ListBuffer
  * import _root_.org.junit.Test
  * import _root_.org.junit.Before
  *
- * class TwoSuite extends JUnit5Suite {
+ * class TwoSuite extends JUnitSuite {
  *
  *   var sb: StringBuilder = _
  *   var lb: ListBuffer[String] = _
@@ -53,8 +53,8 @@ package org.scalatestplus.junit5;
  * </pre>
  *
  * <p>
- * To execute <code>JUnit5Suite</code>s with ScalaTest's <code>Runner</code>, you must include JUnit 5's jar file on the class path or runpath.
- * This version of <code>JUnit5Suite</code> was tested with JUnit version 5.9.
+ * To execute <code>JUnitSuite</code>s with ScalaTest's <code>Runner</code>, you must include JUnit 5's jar file on the class path or runpath.
+ * This version of <code>JUnitSuite</code> was tested with JUnit version 5.9.
  * </p>
  *
  * <p>

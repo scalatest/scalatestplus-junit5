@@ -28,7 +28,7 @@ import org.scalatest.exceptions.{StackDepthException, TestCanceledException}
  * The assertion methods provided in this trait look and behave exactly like the ones in
  * <a href="../Assertions.html"><code>Assertions</code></a>, except instead of throwing
  * <a href="../exceptions/TestFailedException.html"><code>TestFailedException</code></a> they throw
- * <a href="JUnit5TestFailedError.html"><code>JUnit5TestFailedError</code></a>,
+ * <a href="JUnitTestFailedError.html"><code>JUnitTestFailedError</code></a>,
  * which extends <code>org.opentest4j.AssertionFailedError</code>.
  *
  * <p>
@@ -81,8 +81,8 @@ trait AssertionsForJUnit extends VersionSpecificAssertionsForJUnit {
 }
 
 /**
- * Companion object that facilitates the importing of <code>AssertionsForJUnit5</code> members as
- * an alternative to mixing it in. One use case is to import <code>AssertionsForJUnit5</code> members so you can use
+ * Companion object that facilitates the importing of <code>AssertionsForJUnit</code> members as
+ * an alternative to mixing it in. One use case is to import <code>AssertionsForJUnit</code> members so you can use
  * them in the Scala interpreter:
  *
  * <pre>
@@ -91,15 +91,15 @@ trait AssertionsForJUnit extends VersionSpecificAssertionsForJUnit {
  * Welcome to Scala 2.13.10 (OpenJDK 64-Bit Server VM, Java 1.8.0_352).
  * Type in expressions for evaluation. Or try :help.
  *
- * scala> import org.scalatestplus.junit.AssertionsForJUnit5._
- * import org.scalatestplus.junit.AssertionsForJUnit5._
+ * scala> import org.scalatestplus.junit5.AssertionsForJUnit._
+ * import org.scalatestplus.junit5.AssertionsForJUnit._
  *
  * scala> assert(1 === 2)
- * org.scalatestplus.junit.JUnit5TestFailedError: 1 did not equal 2
- *   at org.scalatestplus.junit.AssertionsForJUnit5.newAssertionFailedException(AssertionsForJUnit5.scala:64)
- *   at org.scalatestplus.junit.AssertionsForJUnit5.newAssertionFailedException$(AssertionsForJUnit5.scala:63)
- *   at org.scalatestplus.junit.AssertionsForJUnit5$.newAssertionFailedException(AssertionsForJUnit5.scala:122)
- *   at org.scalatestplus.junit.AssertionsForJUnit5$AssertionsHelper.macroAssert(AssertionsForJUnit5.scala:159)
+ * org.scalatestplus.junit5.JUnitTestFailedError: 1 did not equal 2
+ *   at org.scalatestplus.junit5.AssertionsForJUnit.newAssertionFailedException(AssertionsForJUnit.scala:64)
+ *    at org.scalatestplus.junit5.AssertionsForJUnit.newAssertionFailedException$(AssertionsForJUnit.scala:63)
+ *    at org.scalatestplus.junit5.AssertionsForJUnit$.newAssertionFailedException(AssertionsForJUnit.scala:111)
+ *    at org.scalatestplus.junit5.AssertionsForJUnit$AssertionsHelper.macroAssert(AssertionsForJUnit.scala:148)
  *   ... 35 elided
  * scala> val caught = intercept[StringIndexOutOfBoundsException] { "hi".charAt(-1) }
  * val caught: StringIndexOutOfBoundsException = java.lang.StringIndexOutOfBoundsException: String index out of range: -1
