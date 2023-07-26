@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.scalatestplus</groupId>
             <artifactId>junit-5-9_${scala.compat.version}</artifactId>
-            <version>${scalatest.version}.0-M7</version>
+            <version>${scalatest.version}.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
