@@ -71,8 +71,10 @@ private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionL
         val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         listener.executionSkipped(testDesc, "Test ignored.")
 
-      // TODO: I dont see TestCanceled here. Probably need to add it
-      // Closest thing we can do with pending is report an ignored test
+      case TestCanceled(ordering, message, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, throwable, duration, formatter, location, rerunner, payload, threadName, timeStamp) =>
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
+        listener.executionSkipped(testDesc, throwable.map(t => "Test canceled: " + t.getMessage).getOrElse("Test canceled."))
+
       case TestPending(ordinal, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, duration, formatter, location, payload, threadName, timeStamp) =>
         val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         listener.executionSkipped(testDesc, "Test pending.")
