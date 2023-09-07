@@ -1,11 +1,11 @@
 import java.io.PrintWriter
 import scala.io.Source
 
-name := "junit-5.9"
+name := "junit-5.10"
 
 organization := "org.scalatestplus"
 
-version := "3.2.16.0"
+version := "3.2.17.0"
 
 homepage := Some(url("https://github.com/scalatest/scalatestplus-junit"))
 
@@ -47,9 +47,9 @@ Compile / unmanagedSourceDirectories ++= {
   }
 }
 
-val scalatestVersion = "3.2.16"
-val junitVersion = "5.9.3"
-val junitEngineVersion = "1.9.3"
+val scalatestVersion = "3.2.17"
+val junitVersion = "5.10.0"
+val junitEngineVersion = "1.10.0"
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest-core" % scalatestVersion,
