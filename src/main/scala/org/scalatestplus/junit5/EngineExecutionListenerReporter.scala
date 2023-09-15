@@ -59,11 +59,7 @@ private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionL
         listener.executionStarted(testDesc)
 
       case TestFailed(ordinal, message, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, analysis, throwable, duration, formatter, location, rerunnable, payload, threadName, timeStamp) =>
-        val throwableOrNull =
-          throwable match {
-            case Some(t) => t
-            case None => null // Yuck. Not sure if the exception passed to new Failure can be null, but it could be given this code. Usually throwable would be defined.
-          }
+        val throwableOrNull = throwable.orNull
         val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         listener.executionFinished(testDesc, TestExecutionResult.failed(throwableOrNull))
 
@@ -75,26 +71,20 @@ private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionL
         val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         listener.executionSkipped(testDesc, "Test ignored.")
 
-      // TODO: I dont see TestCanceled here. Probably need to add it
-      // Closest thing we can do with pending is report an ignored test
+      case TestCanceled(ordering, message, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, throwable, duration, formatter, location, rerunner, payload, threadName, timeStamp) =>
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
+        listener.executionSkipped(testDesc, throwable.map(t => "Test canceled: " + t.getMessage).getOrElse("Test canceled."))
+
       case TestPending(ordinal, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, duration, formatter, location, payload, threadName, timeStamp) =>
         val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         listener.executionSkipped(testDesc, "Test pending.")
 
       case SuiteAborted(ordinal, message, suiteName, suiteId, suiteClassName, throwable, duration, formatter, location, rerunnable, payload, threadName, timeStamp) =>
-        val throwableOrNull =
-          throwable match {
-            case Some(t) => t
-            case None => null // Yuck. Not sure if the exception passed to new Failure can be null, but it could be given this code. Usually throwable would be defined.
-          }
+        val throwableOrNull = throwable.orNull
         listener.executionFinished(clzDesc, TestExecutionResult.aborted(throwableOrNull))
 
       case RunAborted(ordinal, message, throwable, duration, summary, formatter, location, payload, threadName, timeStamp) =>
-        val throwableOrNull =
-          throwable match {
-            case Some(t) => t
-            case None => null // Yuck. Not sure if the exception passed to new Failure can be null, but it could be given this code. Usually throwable would be defined.
-          }
+        val throwableOrNull = throwable.orNull
         listener.executionFinished(engineDesc, TestExecutionResult.aborted(throwableOrNull))
 
       case _ =>
@@ -107,9 +97,6 @@ private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionL
     if (!trimmedMessage.isEmpty)
       trimmedMessage
     else
-      throwable match {
-        case Some(t) => t.getMessage.trim
-        case None => ""
-      }
+      throwable.map(_.getMessage.trim).getOrElse("")
   }
 }
