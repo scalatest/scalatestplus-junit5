@@ -5,7 +5,7 @@ name := "junit-5.10"
 
 organization := "org.scalatestplus"
 
-version := "3.2.17.0"
+version := "3.3.0.0-alpha.1"
 
 homepage := Some(url("https://github.com/scalatest/scalatestplus-junit"))
 
@@ -26,14 +26,13 @@ developers := List(
   )
 )
 
-scalaVersion := "2.13.11"
+scalaVersion := "2.13.12"
 
 crossScalaVersions := List(
-  "2.10.7",
   "2.11.12",
   "2.12.18",
-  "2.13.11", 
-  "3.1.3"
+  "2.13.12", 
+  "3.3.1"
 )
 
 scalacOptions ++= Seq("-target:jvm-1.8")
@@ -47,9 +46,9 @@ Compile / unmanagedSourceDirectories ++= {
   }
 }
 
-val scalatestVersion = "3.2.17"
-val junitVersion = "5.10.0"
-val junitEngineVersion = "1.10.0"
+val scalatestVersion = "3.3.0-alpha.1"
+val junitVersion = "5.10.1"
+val junitEngineVersion = "1.10.1"
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest-core" % scalatestVersion,

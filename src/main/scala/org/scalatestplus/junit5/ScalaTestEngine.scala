@@ -277,7 +277,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
 
             suiteToRun.run(None, Args(reporter,
               Stopper.default, filter, ConfigMap.empty, None,
-              new Tracker, Set.empty))
+              new Tracker))
 
             listener.executionFinished(clzDesc, TestExecutionResult.successful())
 
