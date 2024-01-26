@@ -60,7 +60,9 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
 
       val isSuitePredicate =
         new java.util.function.Predicate[Class[_]]() {
-          def test(t: Class[_]): Boolean = classOf[org.scalatest.Suite].isAssignableFrom(t)
+          def test(t: Class[_]): Boolean = 
+            classOf[org.scalatest.Suite].isAssignableFrom(t) &&
+            JUnitHelper.checkForPublicNoArgConstructor(t)
         }
 
       def classDescriptorFunction(aClass: Class[_]) =
