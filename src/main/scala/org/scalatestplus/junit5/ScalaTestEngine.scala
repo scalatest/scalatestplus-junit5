@@ -23,6 +23,7 @@ import org.junit.platform.engine.support.discovery.{EngineDiscoveryRequestResolv
 import org.junit.platform.engine.{EngineDiscoveryRequest, ExecutionRequest, TestDescriptor, TestExecutionResult, UniqueId}
 import org.scalatest.{Args, ConfigMap, DynaTags, Filter, Stopper, Suite, Tracker}
 
+import java.lang.reflect.Modifier
 import java.util.Optional
 import java.util.logging.Logger
 import java.util.stream.Collectors
@@ -62,6 +63,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
         new java.util.function.Predicate[Class[_]]() {
           def test(t: Class[_]): Boolean = 
             classOf[org.scalatest.Suite].isAssignableFrom(t) &&
+            !Modifier.isAbstract(t.getModifiers) &&
             JUnitHelper.checkForPublicNoArgConstructor(t)
         }
 
