@@ -5,7 +5,7 @@ name := "junit-5.10"
 
 organization := "org.scalatestplus"
 
-version := "3.3.0.0-alpha.1"
+version := "3.2.18.0"
 
 homepage := Some(url("https://github.com/scalatest/scalatestplus-junit"))
 
@@ -46,7 +46,7 @@ Compile / unmanagedSourceDirectories ++= {
   }
 }
 
-val scalatestVersion = "3.3.0-alpha.1"
+val scalatestVersion = "3.2.18"
 val junitVersion = "5.10.1"
 val junitEngineVersion = "1.10.1"
 

@@ -3,12 +3,12 @@ ScalaTest + JUnit provides integration support between ScalaTest and JUnit 5.
 
 **Usage**
 
-To use it for ScalaTest 3.2.17 and JUnit 5.10:
+To use it for ScalaTest 3.2.18 and JUnit 5.10:
 
 SBT:
 
 ```
-libraryDependencies += "org.scalatestplus" %% "junit-5-10" % "3.2.17.0" % Test
+libraryDependencies += "org.scalatestplus" %% "junit-5-10" % "3.2.18.0" % Test
 ```
 
 Maven:
@@ -17,7 +17,7 @@ Maven:
 <dependency>
   <groupId>org.scalatestplus</groupId>
   <artifactId>junit-5-10_2.13</artifactId>
-  <version>3.2.17.0</version>
+  <version>3.2.18.0</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -26,12 +26,12 @@ Gradle:
 
 ```
 dependencies {
-    implementation "org.scala-lang:scala-library:2.13.11"
+    implementation "org.scala-lang:scala-library:2.13.12"
 
-    testImplementation "org.scalatest:scalatest_2.13:3.2.17"
-    testImplementation "org.junit.platform:junit-platform-launcher:1.10.0"
-    testRuntimeOnly "org.junit.platform:junit-platform-engine:1.10.0"
-    testRuntimeOnly "org.scalatestplus:junit-5-9_2.13:3.2.17.0"
+    testImplementation "org.scalatest:scalatest_2.13:3.2.18"
+    testImplementation "org.junit.platform:junit-platform-launcher:1.10.1"
+    testRuntimeOnly "org.junit.platform:junit-platform-engine:1.10.1"
+    testRuntimeOnly "org.scalatestplus:junit-5-10_2.13:3.2.18.0"
 }
 
 test {
@@ -48,12 +48,12 @@ Gradle (Kotlin):
 
 ```
 dependencies {
-    implementation("org.scala-lang:scala-library:2.13.11")
+    implementation("org.scala-lang:scala-library:2.13.12")
 
-    testImplementation("org.scalatest:scalatest_2.13:3.2.17")
-    testRuntimeOnly("org.junit.platform:junit-platform-engine:1.10.0")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.0")
-    testRuntimeOnly("org.scalatestplus:junit-5-9_2.13:3.2.17.0")
+    testImplementation("org.scalatest:scalatest_2.13:3.2.18")
+    testRuntimeOnly("org.junit.platform:junit-platform-engine:1.10.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.1")
+    testRuntimeOnly("org.scalatestplus:junit-5-10_2.13:3.2.18.0")
 }
 
 tasks {
