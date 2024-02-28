@@ -53,8 +53,7 @@ package org.scalatestplus.junit5;
  * </pre>
  *
  * <p>
- * To execute <code>JUnitSuite</code>s with ScalaTest's <code>Runner</code>, you must include JUnit 5's jar file on the class path or runpath.
- * This version of <code>JUnitSuite</code> was tested with JUnit version 5.9.
+ * This version of <code>JUnitSuite</code> was tested with JUnit version 5.10.
  * </p>
  *
  * <p>
