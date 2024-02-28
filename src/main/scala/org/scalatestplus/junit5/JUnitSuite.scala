@@ -22,7 +22,8 @@ package org.scalatestplus.junit5;
  * methods annotated with <code>Before</code> and <code>After</code>. For example:
  *
  * <pre class="stHighlight">
- *
+ * import org.junit.jupiter.api.{BeforeEach, Test}
+ * import org.scalatestplus.junit5.JUnitSuite
  * import scala.collection.mutable.ListBuffer
  *
  * class TwoSuite extends JUnitSuite {
