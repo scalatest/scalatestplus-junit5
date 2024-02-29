@@ -22,39 +22,38 @@ package org.scalatestplus.junit5;
  * methods annotated with <code>Before</code> and <code>After</code>. For example:
  *
  * <pre class="stHighlight">
- * import org.scalatest.junit5.JUnitSuite
+ * import org.junit.jupiter.api.{BeforeEach, Test}
+ * import org.scalatestplus.junit5.JUnitSuite
  * import scala.collection.mutable.ListBuffer
- * import _root_.org.junit.Test
- * import _root_.org.junit.Before
  *
  * class TwoSuite extends JUnitSuite {
  *
  *   var sb: StringBuilder = _
  *   var lb: ListBuffer[String] = _
- *
- *   @Before def initialize() {
+ *  
+ *   @BeforeEach def initialize() {
  *     sb = new StringBuilder("ScalaTest is ")
  *     lb = new ListBuffer[String]
  *   }
- *
+ *  
  *   @Test def verifyEasy() {
  *     sb.append("easy!")
  *     assert(sb.toString === "ScalaTest is easy!")
  *     assert(lb.isEmpty)
  *     lb += "sweet"
  *   }
- *
+ *   
  *   @Test def verifyFun() {
  *     sb.append("fun!")
  *     assert(sb.toString === "ScalaTest is fun!")
  *     assert(lb.isEmpty)
  *   }
+ * 
  * }
  * </pre>
  *
  * <p>
- * To execute <code>JUnitSuite</code>s with ScalaTest's <code>Runner</code>, you must include JUnit 5's jar file on the class path or runpath.
- * This version of <code>JUnitSuite</code> was tested with JUnit version 5.9.
+ * This version of <code>JUnitSuite</code> was tested with JUnit version 5.10.
  * </p>
  *
  * <p>
