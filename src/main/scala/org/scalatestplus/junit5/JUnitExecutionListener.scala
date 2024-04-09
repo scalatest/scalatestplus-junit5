@@ -51,7 +51,7 @@ private[junit5] class JUnitExecutionListener(report: Reporter,
         val message = throwable.map(_.toString).getOrElse(Resources.jUnitTestFailed())
         val formatter = getIndentedTextForTest(testName, 1, true)
         val payload =
-          throwable match {
+          throwable.flatMap {
             case optPayload: PayloadField =>
               optPayload.payload
             case _ =>
