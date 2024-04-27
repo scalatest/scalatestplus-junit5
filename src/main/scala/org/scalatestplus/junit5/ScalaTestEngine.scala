@@ -21,14 +21,17 @@ import org.junit.platform.engine.support.descriptor.EngineDescriptor
 import org.junit.platform.engine.support.discovery.SelectorResolver.{Match, Resolution}
 import org.junit.platform.engine.support.discovery.{EngineDiscoveryRequestResolver, SelectorResolver}
 import org.junit.platform.engine.{EngineDiscoveryRequest, ExecutionRequest, TestDescriptor, TestExecutionResult, UniqueId}
-import org.scalatest.{Args, ConfigMap, DynaTags, Filter, Stopper, Suite, Tracker}
+import org.scalatest.{Args, ConfigMap, DynaTags, Filter, ParallelTestExecution, Stopper, Suite, Tracker}
 
 import java.lang.reflect.Modifier
-import java.util.Optional
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.{Optional, UUID}
+import java.util.concurrent.{ExecutorService, Executors, ThreadFactory}
 import java.util.logging.Logger
 import java.util.stream.Collectors
 import scala.collection.JavaConverters._
 import scala.reflect.NameTransformer
+import scala.util.Try
 
 /**
  * ScalaTest implementation for JUnit 5 Test Engine.
@@ -279,9 +282,40 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   )
               }
 
-            suiteToRun.run(None, Args(reporter,
-              Stopper.default, filter, ConfigMap.empty, None,
-              new Tracker))
+            val distributor =
+              if (suiteToRun.isInstanceOf[ParallelTestExecution]) {
+                val numThreads = System.getProperty("org.scalatestplus.junit5.numThreads", "0")
+                val poolSize =
+                  if (System.getProperty("org.scalatestplus.junit5.numThreads", "0") == "0")
+                    Runtime.getRuntime.availableProcessors * 2
+                  else
+                    Try(numThreads.toInt).getOrElse(throw new RuntimeException(Resources.invalidNumThreads(numThreads)))
+                val threadFactory =
+                  new ThreadFactory {
+                    val defaultThreadFactory = Executors.defaultThreadFactory
+                    val atomicThreadCounter = new AtomicInteger
+                    def newThread(runnable: Runnable): Thread = {
+                      val thread = defaultThreadFactory.newThread(runnable)
+                      thread.setName("ScalaTest-" + atomicThreadCounter.incrementAndGet())
+                      thread
+                    }
+                  }
+
+                val execSvc: ExecutorService =
+                  if (poolSize > 0)
+                    Executors.newFixedThreadPool(poolSize, threadFactory)
+                  else
+                    Executors.newCachedThreadPool(threadFactory)
+                val distributor = new ConcurrentDistributor(Args(reporter, Stopper.default, filter, ConfigMap.empty, None, new Tracker), execSvc)
+                try {
+                  suiteToRun.run(None, Args(reporter, Stopper.default, filter, ConfigMap.empty, Some(distributor), new Tracker))
+                  distributor.waitUntilDone()
+                } finally {
+                  execSvc.shutdown()
+                }
+              }
+              else
+                suiteToRun.run(None, Args(reporter, Stopper.default, filter, ConfigMap.empty, None, new Tracker))
 
             listener.executionFinished(clzDesc, TestExecutionResult.successful())
 

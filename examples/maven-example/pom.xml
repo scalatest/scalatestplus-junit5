@@ -11,9 +11,9 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <junit.version>1.9.1</junit.version>
+        <junit.version>1.10.2</junit.version>
         <scalatest.runner.version>0.2.0</scalatest.runner.version>
-        <scalatest.version>3.2.16</scalatest.version>
+        <scalatest.version>3.2.18</scalatest.version>
         <scala.compat.version>2.13</scala.compat.version>
         <scala.version>2.13.11</scala.version>
         <scala.maven.plugin>4.7.1</scala.maven.plugin>
@@ -63,7 +63,7 @@
         </dependency>
         <dependency>
             <groupId>org.scalatestplus</groupId>
-            <artifactId>junit-5-9_${scala.compat.version}</artifactId>
+            <artifactId>junit-5-10_${scala.compat.version}</artifactId>
             <version>${scalatest.version}.0</version>
             <scope>test</scope>
         </dependency>
