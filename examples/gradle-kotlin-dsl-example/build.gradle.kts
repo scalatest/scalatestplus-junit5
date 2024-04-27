@@ -9,12 +9,12 @@ repositories {
 }
 
 dependencies {
-    implementation("org.scala-lang:scala-library:2.12.17")
+    implementation("org.scala-lang:scala3-library_3:3.4.1")
 
-    testImplementation("org.scalatest:scalatest_2.12:3.2.18")
+    testImplementation("org.scalatest:scalatest_3:3.2.18")
     testRuntimeOnly("org.junit.platform:junit-platform-engine:1.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
-    testRuntimeOnly("org.scalatestplus:junit-5-10_2.12:3.2.18.0")
+    testRuntimeOnly("org.scalatestplus:junit-5-10_3:3.2.18.0")
 }
 
 tasks {
