@@ -47,8 +47,8 @@ Compile / unmanagedSourceDirectories ++= {
 }
 
 val scalatestVersion = "3.2.18"
-val junitVersion = "5.10.1"
-val junitEngineVersion = "1.10.1"
+val junitVersion = "5.10.2"
+val junitEngineVersion = "1.10.2"
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest-core" % scalatestVersion,
