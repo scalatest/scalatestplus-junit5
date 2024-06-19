@@ -52,4 +52,5 @@ private[junit5] object Resources {
 
   def rawRunAborted: String = resourceBundle.getString("runAborted")
 
+  def invalidNumThreads(param0: Any): String = makeString("invalidNumThreads", Array(param0))
 }
