@@ -263,7 +263,9 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
             val children = clzDesc.getChildren.asScala
 
             val filter =
-              if (children.isEmpty)
+              if (children.isEmpty ||
+                  suiteToRun.testNames.size == children.size
+              )  // When testNames size is same as children size, it means all tests are selected, so no need to apply filter, this solves the issue of dynamic test names when running suite.
                 Filter()
               else {
                 val SelectedTag = "Selected"
