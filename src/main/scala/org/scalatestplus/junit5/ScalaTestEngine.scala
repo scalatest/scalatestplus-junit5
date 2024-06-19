@@ -279,9 +279,10 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   )
               }
 
-            suiteToRun.run(None, Args(reporter,
+            val status = suiteToRun.run(None, Args(reporter,
               Stopper.default, filter, ConfigMap.empty, None,
               new Tracker))
+            status.waitUntilCompleted()
 
             listener.executionFinished(clzDesc, TestExecutionResult.successful())
 
