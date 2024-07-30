@@ -262,11 +262,15 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
             val reporter = new EngineExecutionListenerReporter(listener, clzDesc, engineDesc)
             val children = clzDesc.getChildren.asScala
 
-            val filter =
-              if (children.isEmpty ||
-                  suiteToRun.testNames.size == children.size
-              )  // When testNames size is same as children size, it means all tests are selected, so no need to apply filter, this solves the issue of dynamic test names when running suite.
-                Filter()
+            val filter = {
+              if (children.isEmpty)
+                Filter(
+                  tagsToInclude = None,
+                  excludeNestedSuites = false,
+                  dynaTags = DynaTags(Map.empty, Map(suiteToRun.suiteId -> Map.empty))
+                )
+              if (suiteToRun.testNames.size == children.size)  // When testNames size is same as children size, it means all tests are selected, so no need to apply filter, this solves the issue of dynamic test names when running suite.
+                Filter.default
               else {
                 val SelectedTag = "Selected"
                 val SelectedSet = Set(SelectedTag)
@@ -277,12 +281,13 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   }.toSet
                 val taggedTests: Map[String, Set[String]] = desiredTests.map(_ -> SelectedSet).toMap
                 val suiteId = suiteToRun.suiteId
-                  Filter(
-                    tagsToInclude = Some(SelectedSet),
-                    excludeNestedSuites = true,
-                    dynaTags = DynaTags(Map.empty, Map(suiteId -> taggedTests))
-                  )
+                Filter(
+                  tagsToInclude = Some(SelectedSet),
+                  excludeNestedSuites = true,
+                  dynaTags = DynaTags(Map.empty, Map(suiteId -> taggedTests))
+                )
               }
+            }
 
             if (suiteToRun.isInstanceOf[ParallelTestExecution]) {
               val numThreads = System.getProperty("org.scalatestplus.junit5.numThreads", "0")
