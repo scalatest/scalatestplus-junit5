@@ -9,11 +9,16 @@ object TagTwo extends Tag("TagTwo")
 
 class TaggedTest extends AnyFlatSpec {
 
-  "Integration tests" can "sometimes be slow" taggedAs TagOne in {
-
+  "Excluded tests" should "should not run" taggedAs TagOne in {
+    fail("This test should not run")
   }
 
-  "Unit tests" can "be fast" taggedAs TagTwo in {
+  "Included tests" should "run" taggedAs TagTwo in {}
+}
 
+class ExcludedTestsSuite extends AnyFlatSpec {
+
+  "A test suite with all tests excluded" should "should not run" taggedAs TagOne in {
+    fail("This test should not run")
   }
 }
