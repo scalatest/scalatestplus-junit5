@@ -8,7 +8,7 @@ To use it for ScalaTest 3.2.19 and JUnit 5.10:
 SBT:
 
 ```
-libraryDependencies += "org.scalatestplus" %% "junit-5-10" % "3.2.19.0" % Test
+libraryDependencies += "org.scalatestplus" %% "junit-5-10" % "3.2.19.1" % Test
 ```
 
 Maven:
@@ -17,7 +17,7 @@ Maven:
 <dependency>
   <groupId>org.scalatestplus</groupId>
   <artifactId>junit-5-10_3</artifactId>
-  <version>3.2.19.0</version>
+  <version>3.2.19.1</version>
   <scope>test</scope>
 </dependency>
 ```
@@ -31,7 +31,7 @@ dependencies {
     testImplementation "org.scalatest:scalatest_3:3.2.19"
     testImplementation "org.junit.platform:junit-platform-launcher:1.10.2"
     testRuntimeOnly "org.junit.platform:junit-platform-engine:1.10.2"
-    testRuntimeOnly "org.scalatestplus:junit-5-10_3:3.2.19.0"
+    testRuntimeOnly "org.scalatestplus:junit-5-10_3:3.2.19.1"
 }
 
 test {
