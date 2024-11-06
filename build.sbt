@@ -1,11 +1,11 @@
 import java.io.PrintWriter
 import scala.io.Source
 
-name := "junit-5.10"
+name := "junit-5.11"
 
 organization := "org.scalatestplus"
 
-version := "3.2.19.1"
+version := "3.2.19.0"
 
 homepage := Some(url("https://github.com/scalatest/scalatestplus-junit"))
 
@@ -26,13 +26,13 @@ developers := List(
   )
 )
 
-scalaVersion := "2.13.13"
+scalaVersion := "2.13.15"
 
 crossScalaVersions := List(
   "2.11.12",
-  "2.12.19",
-  "2.13.13", 
-  "3.3.3"
+  "2.12.20",
+  "2.13.15", 
+  "3.3.4"
 )
 
 scalacOptions ++= Seq("-target:jvm-1.8")
@@ -47,8 +47,8 @@ Compile / unmanagedSourceDirectories ++= {
 }
 
 val scalatestVersion = "3.2.19"
-val junitVersion = "5.10.2"
-val junitEngineVersion = "1.10.2"
+val junitVersion = "5.11.3"
+val junitEngineVersion = "1.11.3"
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest-core" % scalatestVersion,
