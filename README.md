@@ -53,7 +53,7 @@ dependencies {
     testImplementation("org.scalatest:scalatest_3:3.2.19")
     testRuntimeOnly("org.junit.platform:junit-platform-engine:1.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
-    testRuntimeOnly("org.scalatestplus:junit-5-10_3:3.2.19.0")
+    testRuntimeOnly("org.scalatestplus:junit-5-10_3:3.2.19.1")
 }
 
 tasks {
