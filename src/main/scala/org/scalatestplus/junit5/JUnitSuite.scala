@@ -53,7 +53,7 @@ package org.scalatestplus.junit5;
  * </pre>
  *
  * <p>
- * This version of <code>JUnitSuite</code> was tested with JUnit version 5.10.
+ * This version of <code>JUnitSuite</code> was tested with JUnit version 5.12.
  * </p>
  *
  * <p>
