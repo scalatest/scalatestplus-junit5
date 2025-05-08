@@ -55,7 +55,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
     val engineDesc = new EngineDescriptor(uniqueId, "ScalaTest EngineDescriptor")
 
     if (System.getProperty("org.scalatestplus.junit5.ScalaTestEngine.disabled") != "true") {
-      logger.info("Starting test discovery...")
+      logger.fine("Starting test discovery...")
 
       val alwaysTruePredicate =
         new java.util.function.Predicate[String]() {
@@ -234,7 +234,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
 
       resolver.resolve(discoveryRequest, engineDesc)
 
-      logger.info("Completed test discovery, discovered suite count: " + engineDesc.getChildren.size())
+      logger.config("Completed test discovery, discovered suite count: " + engineDesc.getChildren.size())
     }
 
     engineDesc
@@ -245,7 +245,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
    */
   def execute(request: ExecutionRequest): Unit = {
     if (System.getProperty("org.scalatestplus.junit5.ScalaTestEngine.disabled") != "true") {
-      logger.info("Start tests execution...")
+      logger.fine("Start tests execution...")
       val engineDesc = request.getRootTestDescriptor
       val listener = request.getEngineExecutionListener
 
@@ -253,7 +253,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
       engineDesc.getChildren.asScala.foreach { testDesc =>
         testDesc match {
           case clzDesc: ScalaTestClassDescriptor =>
-            logger.info("Start execution of suite class " + clzDesc.suiteClass.getName + "...")
+            logger.fine("Start execution of suite class " + clzDesc.suiteClass.getName + "...")
             listener.executionStarted(clzDesc)
             val suiteClass = clzDesc.suiteClass
             val canInstantiate = JUnitHelper.checkForPublicNoArgConstructor(suiteClass) && classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)
@@ -327,7 +327,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
 
             listener.executionFinished(clzDesc, TestExecutionResult.successful())
 
-            logger.info("Completed execution of suite class " + clzDesc.suiteClass.getName + ".")
+            logger.config("Completed execution of suite class " + clzDesc.suiteClass.getName + ".")
 
           case otherDesc =>
             // Do nothing for other descriptor, just log it.
@@ -335,7 +335,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
         }
       }
       listener.executionFinished(engineDesc, TestExecutionResult.successful())
-      logger.info("Completed tests execution.")
+      logger.fine("Completed tests execution.")
     }
   }
 }
