@@ -21,11 +21,11 @@ import org.junit.platform.engine.support.descriptor.EngineDescriptor
 import org.junit.platform.engine.support.discovery.SelectorResolver.{Match, Resolution}
 import org.junit.platform.engine.support.discovery.{EngineDiscoveryRequestResolver, SelectorResolver}
 import org.junit.platform.engine.{EngineDiscoveryRequest, ExecutionRequest, TestDescriptor, TestExecutionResult, UniqueId}
-import org.scalatest.{Args, ConfigMap, DynaTags, Filter, ParallelTestExecution, Stopper, Suite, Tracker}
+import org.scalatest.{Args, ConfigMap, DynaTags, Filter, ParallelTestExecution, Stopper, Tracker}
 
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.{Optional, UUID}
+import java.util.Optional
 import java.util.concurrent.{ExecutorService, Executors, ThreadFactory}
 import java.util.logging.Logger
 import java.util.stream.Collectors
@@ -107,7 +107,11 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
               .stream()
               .flatMap(addToParentFunction(context))
               .collect(Collectors.toSet())
-          Resolution.matches(matches)
+          if (matches.isEmpty) {
+            Resolution.unresolved()
+          } else {
+            Resolution.matches(matches)
+          }
         }
 
         override def resolve(selector: PackageSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
@@ -116,7 +120,11 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
               .stream()
               .flatMap(addToParentFunction(context))
               .collect(Collectors.toSet())
-          Resolution.matches(matches)
+          if (matches.isEmpty) {
+            Resolution.unresolved()
+          } else {
+            Resolution.matches(matches)
+          }
         }
 
         override def resolve(selector: ModuleSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
@@ -125,7 +133,11 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
               .stream()
               .flatMap(addToParentFunction(context))
               .collect(Collectors.toSet())
-          Resolution.matches(matches)
+          if (matches.isEmpty) {
+            Resolution.unresolved()
+          } else {
+            Resolution.matches(matches)
+          }
         }
 
         override def resolve(selector: ClassSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
