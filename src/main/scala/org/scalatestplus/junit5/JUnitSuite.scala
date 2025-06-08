@@ -30,30 +30,30 @@ package org.scalatestplus.junit5;
  *
  *   var sb: StringBuilder = _
  *   var lb: ListBuffer[String] = _
- *  
+ *
  *   @BeforeEach def initialize() {
  *     sb = new StringBuilder("ScalaTest is ")
  *     lb = new ListBuffer[String]
  *   }
- *  
+ *
  *   @Test def verifyEasy() {
  *     sb.append("easy!")
  *     assert(sb.toString === "ScalaTest is easy!")
  *     assert(lb.isEmpty)
  *     lb += "sweet"
  *   }
- *   
+ *
  *   @Test def verifyFun() {
  *     sb.append("fun!")
  *     assert(sb.toString === "ScalaTest is fun!")
  *     assert(lb.isEmpty)
  *   }
- * 
+ *
  * }
  * </pre>
  *
  * <p>
- * This version of <code>JUnitSuite</code> was tested with JUnit version 5.12.
+ * This version of <code>JUnitSuite</code> was tested with JUnit version 5.13.
  * </p>
  *
  * <p>
