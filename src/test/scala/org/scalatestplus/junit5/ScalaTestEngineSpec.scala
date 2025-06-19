@@ -8,7 +8,7 @@ import org.scalatest.{BeforeAndAfterAll, funspec}
 import org.scalatestplus.junit5.helpers.HappySuite
 
 import java.nio.file.{Files, Paths}
-import scala.jdk.CollectionConverters.SetHasAsScala
+import scala.collection.JavaConverters._
 
 class ScalaTestEngineSpec extends funspec.AnyFunSpec with BeforeAndAfterAll {
   val engine = new ScalaTestEngine
