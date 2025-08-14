@@ -26,36 +26,52 @@ class ScalaTestEngineSpec extends funspec.AnyFunSpec with BeforeAndAfterAll {
     describe("discover method") {
       it("should discover suites on classpath") {
         val classPathRoot = classOf[ScalaTestEngineSpec].getProtectionDomain.getCodeSource.getLocation
-        val discoveryRequest = request.selectors(
-          selectClasspathRoots(java.util.Collections.singleton(Paths.get(classPathRoot.toURI)))
-        ).build()
+        val discoveryRequest = request
+          .selectors(
+            selectClasspathRoots(java.util.Collections.singleton(Paths.get(classPathRoot.toURI)))
+          )
+          .build()
         val engineDescriptor = engine.discover(discoveryRequest, UniqueId.forEngine(engine.getId()))
-        assert(engineDescriptor.getChildren.asScala.exists(td => td.asInstanceOf[ScalaTestClassDescriptor].suiteClass == classOf[HappySuite]))
+        assert(
+          engineDescriptor.getChildren.asScala.exists(td =>
+            td.asInstanceOf[ScalaTestClassDescriptor].suiteClass == classOf[HappySuite]
+          )
+        )
       }
 
       it("should return unresolved for classpath without any tests") {
         val emptyPath = Files.createTempDirectory(null)
-        val discoveryRequest = request.selectors(
-          selectClasspathRoots(java.util.Collections.singleton(emptyPath))
-        ).build()
+        val discoveryRequest = request
+          .selectors(
+            selectClasspathRoots(java.util.Collections.singleton(emptyPath))
+          )
+          .build()
 
         val engineDescriptor = engine.discover(discoveryRequest, UniqueId.forEngine(engine.getId()))
         assert(engineDescriptor.getChildren.asScala.isEmpty)
       }
 
       it("should discover suites in package") {
-        val discoveryRequest = request.selectors(
-          selectPackage("org.scalatestplus.junit5.helpers")
-        ).build()
+        val discoveryRequest = request
+          .selectors(
+            selectPackage("org.scalatestplus.junit5.helpers")
+          )
+          .build()
 
         val engineDescriptor = engine.discover(discoveryRequest, UniqueId.forEngine(engine.getId()))
-        assert(engineDescriptor.getChildren.asScala.exists(td => td.asInstanceOf[ScalaTestClassDescriptor].suiteClass == classOf[HappySuite]))
+        assert(
+          engineDescriptor.getChildren.asScala.exists(td =>
+            td.asInstanceOf[ScalaTestClassDescriptor].suiteClass == classOf[HappySuite]
+          )
+        )
       }
 
       it("should return unresolved for package without any tests") {
-        val discoveryRequest = request.selectors(
-          selectPackage("org.scalatestplus.junit5.nonexistant")
-        ).build()
+        val discoveryRequest = request
+          .selectors(
+            selectPackage("org.scalatestplus.junit5.nonexistant")
+          )
+          .build()
 
         val engineDescriptor = engine.discover(discoveryRequest, UniqueId.forEngine(engine.getId()))
         assert(engineDescriptor.getChildren.asScala.isEmpty)

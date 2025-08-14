@@ -16,11 +16,23 @@
 package org.scalatestplus.junit5
 
 import org.junit.platform.commons.support.ReflectionSupport
-import org.junit.platform.engine.discovery.{ClassSelector, ClasspathRootSelector, ModuleSelector, PackageSelector, UniqueIdSelector}
+import org.junit.platform.engine.discovery.{
+  ClassSelector,
+  ClasspathRootSelector,
+  ModuleSelector,
+  PackageSelector,
+  UniqueIdSelector
+}
 import org.junit.platform.engine.support.descriptor.EngineDescriptor
 import org.junit.platform.engine.support.discovery.SelectorResolver.{Match, Resolution}
 import org.junit.platform.engine.support.discovery.{EngineDiscoveryRequestResolver, SelectorResolver}
-import org.junit.platform.engine.{EngineDiscoveryRequest, ExecutionRequest, TestDescriptor, TestExecutionResult, UniqueId}
+import org.junit.platform.engine.{
+  EngineDiscoveryRequest,
+  ExecutionRequest,
+  TestDescriptor,
+  TestExecutionResult,
+  UniqueId
+}
 import org.scalatest.{Args, ConfigMap, DynaTags, Filter, ParallelTestExecution, Stopper, Tracker}
 
 import java.lang.reflect.Modifier
@@ -33,21 +45,19 @@ import scala.collection.JavaConverters._
 import scala.reflect.NameTransformer
 import scala.util.Try
 
-/**
- * ScalaTest implementation for JUnit 5 Test Engine.
- */ 
+/** ScalaTest implementation for JUnit 5 Test Engine.
+  */
 class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
 
   private val logger = Logger.getLogger(classOf[ScalaTestEngine].getName)
 
-  /**
-   * Test engine ID, return "scalatest".
-   */
+  /** Test engine ID, return "scalatest".
+    */
   def getId: String = "scalatest"
 
-  /**
-   * Discover ScalaTest suites, you can disable the discover by setting system property org.scalatestplus.junit5.ScalaTestEngine.disabled to "true".
-   */
+  /** Discover ScalaTest suites, you can disable the discover by setting system property
+    * org.scalatestplus.junit5.ScalaTestEngine.disabled to "true".
+    */
   def discover(discoveryRequest: EngineDiscoveryRequest, uniqueId: UniqueId): TestDescriptor = {
     // reference: https://blogs.oracle.com/javamagazine/post/junit-build-custom-test-engines-java
     //            https://software-matters.net/posts/custom-test-engine/
@@ -64,10 +74,10 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
 
       val isSuitePredicate =
         new java.util.function.Predicate[Class[_]]() {
-          def test(t: Class[_]): Boolean = 
+          def test(t: Class[_]): Boolean =
             classOf[org.scalatest.Suite].isAssignableFrom(t) &&
-            !Modifier.isAbstract(t.getModifiers) &&
-            JUnitHelper.checkForPublicNoArgConstructor(t)
+              !Modifier.isAbstract(t.getModifiers) &&
+              JUnitHelper.checkForPublicNoArgConstructor(t)
         }
 
       def classDescriptorFunction(aClass: Class[_]) =
@@ -76,7 +86,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
             val suiteUniqueId = parent.getUniqueId.append(ScalaTestClassDescriptor.segmentType, aClass.getName)
             parent.getChildren.asScala.find(_.getUniqueId == suiteUniqueId) match {
               case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
-              case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, aClass, true))
+              case None    => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, aClass, true))
             }
           }
         }
@@ -88,12 +98,11 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
           }
         }
 
-
-
       def addToParentFunction(context: SelectorResolver.Context) =
         new java.util.function.Function[Class[_], java.util.stream.Stream[Match]]() {
           def apply(aClass: Class[_]): java.util.stream.Stream[Match] = {
-            context.addToParent(classDescriptorFunction(aClass))
+            context
+              .addToParent(classDescriptorFunction(aClass))
               .map[java.util.stream.Stream[Match]](toMatch)
               .orElse(java.util.stream.Stream.empty())
           }
@@ -101,9 +110,13 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
 
       val classSelectorResolver = new SelectorResolver {
 
-        override def resolve(selector: ClasspathRootSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
+        override def resolve(
+            selector: ClasspathRootSelector,
+            context: SelectorResolver.Context
+        ): SelectorResolver.Resolution = {
           val matches =
-            ReflectionSupport.findAllClassesInClasspathRoot(selector.getClasspathRoot, isSuitePredicate, alwaysTruePredicate)
+            ReflectionSupport
+              .findAllClassesInClasspathRoot(selector.getClasspathRoot, isSuitePredicate, alwaysTruePredicate)
               .stream()
               .flatMap(addToParentFunction(context))
               .collect(Collectors.toSet())
@@ -114,9 +127,13 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
           }
         }
 
-        override def resolve(selector: PackageSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
+        override def resolve(
+            selector: PackageSelector,
+            context: SelectorResolver.Context
+        ): SelectorResolver.Resolution = {
           val matches =
-            ReflectionSupport.findAllClassesInPackage(selector.getPackageName, isSuitePredicate, alwaysTruePredicate)
+            ReflectionSupport
+              .findAllClassesInPackage(selector.getPackageName, isSuitePredicate, alwaysTruePredicate)
               .stream()
               .flatMap(addToParentFunction(context))
               .collect(Collectors.toSet())
@@ -127,9 +144,13 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
           }
         }
 
-        override def resolve(selector: ModuleSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
+        override def resolve(
+            selector: ModuleSelector,
+            context: SelectorResolver.Context
+        ): SelectorResolver.Resolution = {
           val matches =
-            ReflectionSupport.findAllClassesInModule(selector.getModuleName, isSuitePredicate, alwaysTruePredicate)
+            ReflectionSupport
+              .findAllClassesInModule(selector.getModuleName, isSuitePredicate, alwaysTruePredicate)
               .stream()
               .flatMap(addToParentFunction(context))
               .collect(Collectors.toSet())
@@ -140,11 +161,14 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
           }
         }
 
-        override def resolve(selector: ClassSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
+        override def resolve(
+            selector: ClassSelector,
+            context: SelectorResolver.Context
+        ): SelectorResolver.Resolution = {
           val testClass = selector.getJavaClass
           if (isSuitePredicate.test(testClass)) {
-            context.addToParent(
-              new java.util.function.Function[TestDescriptor, Optional[ScalaTestClassDescriptor]]() {
+            context
+              .addToParent(new java.util.function.Function[TestDescriptor, Optional[ScalaTestClassDescriptor]]() {
                 def apply(parent: TestDescriptor): Optional[ScalaTestClassDescriptor] = {
                   val suiteUniqueId = parent.getUniqueId.append(ScalaTestClassDescriptor.segmentType, testClass.getName)
                   parent.getChildren.asScala.find(_.getUniqueId == suiteUniqueId) match {
@@ -153,84 +177,90 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   }
                 }
               })
-            .map[Resolution](
-              new java.util.function.Function[TestDescriptor, Resolution]() {
-                def apply(td: TestDescriptor): Resolution = Resolution.`match`(Match.exact(td))
-              }
-            ).orElse(Resolution.unresolved())
-          }
-          else
+              .map[Resolution](
+                new java.util.function.Function[TestDescriptor, Resolution]() {
+                  def apply(td: TestDescriptor): Resolution = Resolution.`match`(Match.exact(td))
+                }
+              )
+              .orElse(Resolution.unresolved())
+          } else
             Resolution.unresolved()
         }
       }
 
       val uniqueIdSelectorResolver = new SelectorResolver {
-        override def resolve(selector: UniqueIdSelector, context: SelectorResolver.Context): SelectorResolver.Resolution = {
+        override def resolve(
+            selector: UniqueIdSelector,
+            context: SelectorResolver.Context
+        ): SelectorResolver.Resolution = {
           selector.getUniqueId.getSegments.asScala.toList match {
-            case engineSeg :: suiteSeg :: testSeg :: Nil if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && testSeg.getType == "test" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
+            case engineSeg :: suiteSeg :: testSeg :: Nil
+                if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && testSeg.getType == "test" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
               val suiteClassName = suiteSeg.getValue
               val suiteClass = Class.forName(suiteClassName)
               if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)) {
-                context.addToParent(
-                  new java.util.function.Function[TestDescriptor, Optional[ScalaTestClassDescriptor]]() {
-                    def apply(parent: TestDescriptor): Optional[ScalaTestClassDescriptor] = {
-                      val children = parent.getChildren.asScala
-                      val suiteUniqueId = uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClass.getName)
-                      val testUniqueId = suiteUniqueId.append("test", testSeg.getValue)
-                      val testDesc = new ScalaTestDescriptor(testUniqueId, testSeg.getValue, None)
-                      val (suiteDesc, result) =
-                        children.find(_.getUniqueId == suiteUniqueId) match {
-                          case Some(suiteDesc) =>
-                            (suiteDesc, Optional.empty[ScalaTestClassDescriptor]())
+                context
+                  .addToParent(
+                    new java.util.function.Function[TestDescriptor, Optional[ScalaTestClassDescriptor]]() {
+                      def apply(parent: TestDescriptor): Optional[ScalaTestClassDescriptor] = {
+                        val children = parent.getChildren.asScala
+                        val suiteUniqueId = uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClass.getName)
+                        val testUniqueId = suiteUniqueId.append("test", testSeg.getValue)
+                        val testDesc = new ScalaTestDescriptor(testUniqueId, testSeg.getValue, None)
+                        val (suiteDesc, result) =
+                          children.find(_.getUniqueId == suiteUniqueId) match {
+                            case Some(suiteDesc) =>
+                              (suiteDesc, Optional.empty[ScalaTestClassDescriptor]())
 
-                          case None =>
-                            val suiteDesc = new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass, false)
-                            (suiteDesc, Optional.of(suiteDesc))
+                            case None =>
+                              val suiteDesc = new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass, false)
+                              (suiteDesc, Optional.of(suiteDesc))
+                          }
+
+                        suiteDesc.getChildren.asScala.find(_.getUniqueId == testUniqueId) match {
+                          case Some(_) => // Do nothing if the test already exists
+                          case None    => suiteDesc.addChild(testDesc)
                         }
 
-                      suiteDesc.getChildren.asScala.find(_.getUniqueId == testUniqueId) match {
-                        case Some(_) => // Do nothing if the test already exists
-                        case None => suiteDesc.addChild(testDesc)
+                        result
                       }
-
-                      result
                     }
-                  }
-                )
-                .map[Resolution](
-                  new java.util.function.Function[TestDescriptor, Resolution]() {
-                    def apply(td: TestDescriptor): Resolution = Resolution.`match`(Match.exact(td))
-                  }
-                )
-                .orElse(Resolution.unresolved())
-              }
-              else
+                  )
+                  .map[Resolution](
+                    new java.util.function.Function[TestDescriptor, Resolution]() {
+                      def apply(td: TestDescriptor): Resolution = Resolution.`match`(Match.exact(td))
+                    }
+                  )
+                  .orElse(Resolution.unresolved())
+              } else
                 Resolution.unresolved()
 
-            case engineSeg :: suiteSeg :: Nil if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
+            case engineSeg :: suiteSeg :: Nil
+                if engineSeg.getType == "engine" && engineSeg.getValue == "scalatest" && suiteSeg.getType == ScalaTestClassDescriptor.segmentType =>
               val suiteClassName = suiteSeg.getValue
               val suiteClass = Class.forName(suiteClassName)
               if (classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)) {
-                context.addToParent(
-                  new java.util.function.Function[TestDescriptor, Optional[ScalaTestClassDescriptor]]() {
-                    def apply(parent: TestDescriptor): Optional[ScalaTestClassDescriptor] = {
-                      val children = parent.getChildren.asScala
-                      val suiteUniqueId = uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClass.getName)
-                      children.find(_.getUniqueId == suiteUniqueId) match {
-                        case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
-                        case None => Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass, false))
+                context
+                  .addToParent(
+                    new java.util.function.Function[TestDescriptor, Optional[ScalaTestClassDescriptor]]() {
+                      def apply(parent: TestDescriptor): Optional[ScalaTestClassDescriptor] = {
+                        val children = parent.getChildren.asScala
+                        val suiteUniqueId = uniqueId.append(ScalaTestClassDescriptor.segmentType, suiteClass.getName)
+                        children.find(_.getUniqueId == suiteUniqueId) match {
+                          case Some(_) => Optional.empty[ScalaTestClassDescriptor]()
+                          case None =>
+                            Optional.of(new ScalaTestClassDescriptor(engineDesc, suiteUniqueId, suiteClass, false))
+                        }
                       }
                     }
-                  }
-                )
-                .map[Resolution](
-                  new java.util.function.Function[TestDescriptor, Resolution]() {
-                    def apply(td: TestDescriptor): Resolution = Resolution.`match`(Match.exact(td))
-                  }
-                )
-                .orElse(Resolution.unresolved())
-              }
-              else
+                  )
+                  .map[Resolution](
+                    new java.util.function.Function[TestDescriptor, Resolution]() {
+                      def apply(td: TestDescriptor): Resolution = Resolution.`match`(Match.exact(td))
+                    }
+                  )
+                  .orElse(Resolution.unresolved())
+              } else
                 Resolution.unresolved()
 
             case _ => Resolution.unresolved()
@@ -238,11 +268,12 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
         }
       }
 
-      val resolver = EngineDiscoveryRequestResolver.builder[EngineDescriptor]()
-                     .addClassContainerSelectorResolver(isSuitePredicate)
-                     .addSelectorResolver(classSelectorResolver)
-                     .addSelectorResolver(uniqueIdSelectorResolver)
-                     .build()
+      val resolver = EngineDiscoveryRequestResolver
+        .builder[EngineDescriptor]()
+        .addClassContainerSelectorResolver(isSuitePredicate)
+        .addSelectorResolver(classSelectorResolver)
+        .addSelectorResolver(uniqueIdSelectorResolver)
+        .build()
 
       resolver.resolve(discoveryRequest, engineDesc)
 
@@ -252,9 +283,9 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
     engineDesc
   }
 
-  /**
-   * Execute ScalaTest suites, you can disable the ScalaTest suites execution by setting system property org.scalatestplus.junit.JUnit5TestEngine.disabled to "true".
-   */
+  /** Execute ScalaTest suites, you can disable the ScalaTest suites execution by setting system property
+    * org.scalatestplus.junit.JUnit5TestEngine.disabled to "true".
+    */
   def execute(request: ExecutionRequest): Unit = {
     if (System.getProperty("org.scalatestplus.junit5.ScalaTestEngine.disabled") != "true") {
       logger.fine("Start tests execution...")
@@ -268,7 +299,8 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
             logger.fine("Start execution of suite class " + clzDesc.suiteClass.getName + "...")
             listener.executionStarted(clzDesc)
             val suiteClass = clzDesc.suiteClass
-            val canInstantiate = JUnitHelper.checkForPublicNoArgConstructor(suiteClass) && classOf[org.scalatest.Suite].isAssignableFrom(suiteClass)
+            val canInstantiate = JUnitHelper.checkForPublicNoArgConstructor(suiteClass) && classOf[org.scalatest.Suite]
+              .isAssignableFrom(suiteClass)
             require(canInstantiate, "Must pass an org.scalatest.Suite with a public no-arg constructor")
             val suiteToRun = suiteClass.newInstance.asInstanceOf[org.scalatest.Suite]
             val reporter = new EngineExecutionListenerReporter(listener, clzDesc, engineDesc)
@@ -281,16 +313,21 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   excludeNestedSuites = false,
                   dynaTags = DynaTags(Map.empty, Map(suiteToRun.suiteId -> Map.empty))
                 )
-              if (suiteToRun.testNames.size == children.size)  // When testNames size is same as children size, it means all tests are selected, so no need to apply filter, this solves the issue of dynamic test names when running suite.
+              if (
+                suiteToRun.testNames.size == children.size
+              ) // When testNames size is same as children size, it means all tests are selected, so no need to apply filter, this solves the issue of dynamic test names when running suite.
                 Filter.default
               else {
                 val SelectedTag = "Selected"
                 val SelectedSet = Set(SelectedTag)
                 val testNames = suiteToRun.testNames
                 val desiredTests: Set[String] =
-                  children.map(_.getDisplayName).filter { tn =>
-                    testNames.contains(tn) || testNames.contains(NameTransformer.decode(tn))
-                  }.toSet
+                  children
+                    .map(_.getDisplayName)
+                    .filter { tn =>
+                      testNames.contains(tn) || testNames.contains(NameTransformer.decode(tn))
+                    }
+                    .toSet
                 val taggedTests: Map[String, Set[String]] = desiredTests.map(_ -> SelectedSet).toMap
                 val suiteId = suiteToRun.suiteId
                 Filter(
@@ -324,16 +361,22 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   Executors.newFixedThreadPool(poolSize, threadFactory)
                 else
                   Executors.newCachedThreadPool(threadFactory)
-              val distributor = new ConcurrentDistributor(Args(reporter, Stopper.default, filter, ConfigMap.empty, None, new Tracker), execSvc)
+              val distributor = new ConcurrentDistributor(
+                Args(reporter, Stopper.default, filter, ConfigMap.empty, None, new Tracker),
+                execSvc
+              )
               try {
-                suiteToRun.run(None, Args(reporter, Stopper.default, filter, ConfigMap.empty, Some(distributor), new Tracker))
+                suiteToRun.run(
+                  None,
+                  Args(reporter, Stopper.default, filter, ConfigMap.empty, Some(distributor), new Tracker)
+                )
                 distributor.waitUntilDone()
               } finally {
                 execSvc.shutdown()
               }
-            }
-            else {
-              val status = suiteToRun.run(None, Args(reporter, Stopper.default, filter, ConfigMap.empty, None, new Tracker))
+            } else {
+              val status =
+                suiteToRun.run(None, Args(reporter, Stopper.default, filter, ConfigMap.empty, None, new Tracker))
               status.waitUntilCompleted()
             }
 

@@ -63,8 +63,10 @@ class JUnitSuiteSpec extends funspec.AnyFunSpec {
       assert(b.testNames === TreeSet[String]())
     }
 
-    it("should return names of methods that are annotated with Test, take no params, but have a return type " +
-      "other than Unit from testNames") {
+    it(
+      "should return names of methods that are annotated with Test, take no params, but have a return type " +
+        "other than Unit from testNames"
+    ) {
 
       val a = new TestWithNonUnitMethod
       assert(a.testNames === TreeSet("doThat", "doTheOtherThing", "doThis"))
@@ -145,7 +147,17 @@ class JUnitSuiteSpec extends funspec.AnyFunSpec {
       TestWasCalledSuite.reinitialize()
 
       val a = new TestWasCalledSuite
-      a.run(None, Args(SilentReporter, Stopper.default, Filter(Some(Set("org.scalatest.SlowAsMolasses")), Set()), ConfigMap.empty, None, new Tracker))
+      a.run(
+        None,
+        Args(
+          SilentReporter,
+          Stopper.default,
+          Filter(Some(Set("org.scalatest.SlowAsMolasses")), Set()),
+          ConfigMap.empty,
+          None,
+          new Tracker
+        )
+      )
       assert(!TestWasCalledSuite.theDoThisCalled)
       assert(!TestWasCalledSuite.theDoThatCalled)
     }
@@ -164,19 +176,29 @@ class JUnitSuiteSpec extends funspec.AnyFunSpec {
 
       val d = new DSuite
       assert(d.expectedTestCount(Filter(Some(Set("org.scalatestplus.junit.FastAsLight")), Set())) === 0)
-      assert(d.expectedTestCount(Filter(Some(Set("org.scalatestplus.junit.SlowAsMolasses")), Set("org.scalatest.FastAsLight"))) === 0)
+      assert(
+        d.expectedTestCount(
+          Filter(Some(Set("org.scalatestplus.junit.SlowAsMolasses")), Set("org.scalatest.FastAsLight"))
+        ) === 0
+      )
       assert(d.expectedTestCount(Filter(None, Set("org.scalatestplus.junit.SlowAsMolasses"))) === 6)
       assert(d.expectedTestCount(Filter()) === 6)
 
       val e = new ESuite
       assert(e.expectedTestCount(Filter(Some(Set("org.scalatestplus.junit.FastAsLight")), Set())) === 0)
-      assert(e.expectedTestCount(Filter(Some(Set("org.scalatestplus.junit.SlowAsMolasses")), Set("org.scalatest.FastAsLight"))) === 0)
+      assert(
+        e.expectedTestCount(
+          Filter(Some(Set("org.scalatestplus.junit.SlowAsMolasses")), Set("org.scalatest.FastAsLight"))
+        ) === 0
+      )
       assert(e.expectedTestCount(Filter(None, Set("org.scalatestplus.junit.SlowAsMolasses"))) === 1)
       assert(e.expectedTestCount(Filter()) === 1)
     }
 
-    it("should generate a test failure if a Throwable, or an Error other than direct Error subtypes " +
-      "known in JDK 1.5, excluding AssertionError") {
+    it(
+      "should generate a test failure if a Throwable, or an Error other than direct Error subtypes " +
+        "known in JDK 1.5, excluding AssertionError"
+    ) {
       val a = new ShouldFailSuite
       val rep = new EventRecordingReporter
       a.run(None, Args(rep))

@@ -39,45 +39,78 @@ class ScalaTestDescriptorSpec extends funspec.AnyFunSpec {
 
       it("should return ClassSource when location is TopOfClass") {
         val locationOpt = Some(TopOfClass(className))
-        val descriptor1 = new ScalaTestDescriptor(uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName), displayName, locationOpt)
+        val descriptor1 = new ScalaTestDescriptor(
+          uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName),
+          displayName,
+          locationOpt
+        )
         assert(descriptor1.getSource.isPresent)
         assert(descriptor1.getSource.get() == ClassSource.from(className))
       }
 
       it("should return MethodSource when location is TopOfMethod") {
-        val descriptor1 = new ScalaTestDescriptor(uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName), displayName,
-                                                  Some(TopOfMethod(className, "public long java.util.concurrent.CountDownLatch.getCount()")))
+        val descriptor1 = new ScalaTestDescriptor(
+          uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName),
+          displayName,
+          Some(TopOfMethod(className, "public long java.util.concurrent.CountDownLatch.getCount()"))
+        )
         assert(descriptor1.getSource.isPresent)
         assert(descriptor1.getSource.get() == MethodSource.from(className, "getCount"))
 
-        val descriptor2 = new ScalaTestDescriptor(uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName), displayName,
-          Some(TopOfMethod(className, "public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException")))
+        val descriptor2 = new ScalaTestDescriptor(
+          uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName),
+          displayName,
+          Some(
+            TopOfMethod(
+              className,
+              "public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException"
+            )
+          )
+        )
         assert(descriptor2.getSource.isPresent)
         assert(descriptor2.getSource.get() == MethodSource.from(className, "wait", "long,int"))
 
-        val descriptor3 = new ScalaTestDescriptor(uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName), displayName,
-          Some(TopOfMethod(className, "public boolean java.lang.Object.equals(java.lang.Object)")))
+        val descriptor3 = new ScalaTestDescriptor(
+          uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName),
+          displayName,
+          Some(TopOfMethod(className, "public boolean java.lang.Object.equals(java.lang.Object)"))
+        )
         assert(descriptor3.getSource.isPresent)
         assert(descriptor3.getSource.get() == MethodSource.from(className, "equals", "java.lang.Object"))
       }
 
       it("should return FileSource when location is LineInFile") {
         val locationOpt = Some(LineInFile(lineNumber, fileName, filePathname))
-        val descriptor1 = new ScalaTestDescriptor(uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName), displayName, locationOpt)
+        val descriptor1 = new ScalaTestDescriptor(
+          uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName),
+          displayName,
+          locationOpt
+        )
         assert(descriptor1.getSource.isPresent)
-        assert(descriptor1.getSource.get() == FileSource.from(new File(filePathname.getOrElse(fileName)), FilePosition.from(lineNumber)))
+        assert(
+          descriptor1.getSource
+            .get() == FileSource.from(new File(filePathname.getOrElse(fileName)), FilePosition.from(lineNumber))
+        )
       }
 
       it("should return ClassSource when location is SeeStackDepthException") {
         val locationOpt = Some(SeeStackDepthException)
-        val descriptor1 = new ScalaTestDescriptor(uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName), displayName, locationOpt)
+        val descriptor1 = new ScalaTestDescriptor(
+          uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName),
+          displayName,
+          locationOpt
+        )
         assert(descriptor1.getSource.isPresent)
         assert(descriptor1.getSource.get() == ClassSource.from(className))
       }
 
       it("should return Optional.empty when location is None") {
         val locationOpt = None
-        val descriptor1 = new ScalaTestDescriptor(uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName), displayName, locationOpt)
+        val descriptor1 = new ScalaTestDescriptor(
+          uniqueId.append(ScalaTestClassDescriptor.segmentType, className).append("test", displayName),
+          displayName,
+          locationOpt
+        )
         assert(!descriptor1.getSource.isPresent)
       }
 

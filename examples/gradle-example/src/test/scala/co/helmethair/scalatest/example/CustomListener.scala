@@ -8,6 +8,8 @@ class CustomListener extends TestExecutionListener {
   }
 
   override def executionFinished(testIdentifier: TestIdentifier, testExecutionResult: TestExecutionResult): Unit = {
-    System.err.println(s">>>>> CustomListener: execution FINISHED: ${testIdentifier.getDisplayName} with result: ${testExecutionResult.getStatus.name()}")
+    System.err.println(
+      s">>>>> CustomListener: execution FINISHED: ${testIdentifier.getDisplayName} with result: ${testExecutionResult.getStatus.name()}"
+    )
   }
 }

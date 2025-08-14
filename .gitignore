@@ -7,3 +7,5 @@ _site/
 .bsp/
 build/
 .gradle/
+**/.metals
+**/.bloop
