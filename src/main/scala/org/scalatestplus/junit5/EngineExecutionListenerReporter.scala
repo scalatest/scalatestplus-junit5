@@ -19,7 +19,11 @@ import org.junit.platform.engine.{EngineExecutionListener, TestDescriptor, TestE
 import org.scalatest.{Resources => _, _}
 import org.scalatest.events._
 
-private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionListener, clzDesc: ScalaTestClassDescriptor, engineDesc: TestDescriptor) extends Reporter {
+private[junit5] class EngineExecutionListenerReporter(
+    listener: EngineExecutionListener,
+    clzDesc: ScalaTestClassDescriptor,
+    engineDesc: TestDescriptor
+) extends Reporter {
 
   // This form isn't clearly specified in JUnit docs, but some tools may assume it, so why rock the boat.
   // Here's what JUnit code does:
@@ -34,56 +38,204 @@ private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionL
   private def testDescriptionName(suiteName: String, suiteClassName: Option[String], testName: String) =
     suiteClassName match {
       case Some(suiteClassName) => testName + "(" + suiteClassName + ")"
-      case None => testName + "(" + suiteName + ")"
+      case None                 => testName + "(" + suiteName + ")"
     }
 
   private def suiteDescriptionName(suiteName: String, suiteClassName: Option[String]) =
     suiteClassName match {
       case Some(suiteClassName) => suiteClassName
-      case None => suiteName
+      case None                 => suiteName
     }
 
-  private def createTestDescriptor(suiteId: String, suiteName: String, suiteClassName: Option[String], testName: String, locationOpt: Option[Location]): ScalaTestDescriptor = {
+  private def createTestDescriptor(
+      suiteId: String,
+      suiteName: String,
+      suiteClassName: Option[String],
+      testName: String,
+      locationOpt: Option[Location]
+  ): ScalaTestDescriptor = {
     val uniqueId = clzDesc.theUniqueId.append("test", testName)
     new ScalaTestDescriptor(uniqueId, testName, locationOpt)
   }
 
   override def apply(event: Event): Unit = {
 
+    def getQualifiedName(
+        suiteID: String,
+        suiteName: String,
+        suiteClassName: Option[String],
+        testName: String,
+        ordinal: Ordinal
+    ) = {
+      val qualifiedName = if (suiteClassName.contains(clzDesc.suiteClass.getName)) {
+        testName
+      } else {
+        // nested test case, demands a qualified name
+        val idWithoutClassName = suiteID.stripPrefix(clzDesc.suiteClass.getName).stripPrefix("$")
+        s"$idWithoutClassName-$testName"
+      }
+      qualifiedName
+    }
+
     event match {
 
-      case TestStarting(ordinal, suiteName, suiteId, suiteClassName, testName, testText, formatter, location, rerunnable, payload, threadName, timeStamp) =>
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
+      case TestStarting(
+            ordinal,
+            suiteName,
+            suiteId,
+            suiteClassName,
+            testName,
+            testText,
+            formatter,
+            location,
+            rerunnable,
+            payload,
+            threadName,
+            timeStamp
+          ) =>
+
+        val qualifiedName: String = getQualifiedName(suiteId, suiteName, suiteClassName, testName, ordinal)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, qualifiedName, location)
+
         clzDesc.addChild(testDesc)
         listener.dynamicTestRegistered(testDesc)
         listener.executionStarted(testDesc)
 
-      case TestFailed(ordinal, message, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, analysis, throwable, duration, formatter, location, rerunnable, payload, threadName, timeStamp) =>
+      case TestFailed(
+            ordinal,
+            message,
+            suiteName,
+            suiteId,
+            suiteClassName,
+            testName,
+            testText,
+            recordedEvents,
+            analysis,
+            throwable,
+            duration,
+            formatter,
+            location,
+            rerunnable,
+            payload,
+            threadName,
+            timeStamp
+          ) =>
+        val qualifiedName = getQualifiedName(suiteId, suiteName, suiteClassName, testName, ordinal)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, qualifiedName, location)
         val throwableOrNull = throwable.orNull
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
         listener.executionFinished(testDesc, TestExecutionResult.failed(throwableOrNull))
 
-      case TestSucceeded(ordinal, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, duration, formatter, location, rerunnable, payload, threadName, timeStamp) =>
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
+      case TestSucceeded(
+            ordinal,
+            suiteName,
+            suiteId,
+            suiteClassName,
+            testName,
+            testText,
+            recordedEvents,
+            duration,
+            formatter,
+            location,
+            rerunnable,
+            payload,
+            threadName,
+            timeStamp
+          ) =>
+        val qualifiedName = getQualifiedName(suiteId, suiteName, suiteClassName, testName, ordinal)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, qualifiedName, location)
         listener.executionFinished(testDesc, TestExecutionResult.successful())
 
-      case TestIgnored(ordinal, suiteName, suiteId, suiteClassName, testName, testText, formatter, location, payload, threadName, timeStamp) =>
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
+      case TestIgnored(
+            ordinal,
+            suiteName,
+            suiteId,
+            suiteClassName,
+            testName,
+            testText,
+            formatter,
+            location,
+            payload,
+            threadName,
+            timeStamp
+          ) =>
+        val qualifiedName = getQualifiedName(suiteId, suiteName, suiteClassName, testName, ordinal)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, qualifiedName, location)
         listener.executionSkipped(testDesc, "Test ignored.")
 
-      case TestCanceled(ordering, message, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, throwable, duration, formatter, location, rerunner, payload, threadName, timeStamp) =>
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
-        listener.executionSkipped(testDesc, throwable.map(t => "Test canceled: " + t.getMessage).getOrElse("Test canceled."))
+      case TestCanceled(
+            ordinal,
+            message,
+            suiteName,
+            suiteId,
+            suiteClassName,
+            testName,
+            testText,
+            recordedEvents,
+            throwable,
+            duration,
+            formatter,
+            location,
+            rerunner,
+            payload,
+            threadName,
+            timeStamp
+          ) =>
+        val qualifiedName = getQualifiedName(suiteId, suiteName, suiteClassName, testName, ordinal)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, qualifiedName, location)
+        listener.executionSkipped(
+          testDesc,
+          throwable.map(t => "Test canceled: " + t.getMessage).getOrElse("Test canceled.")
+        )
 
-      case TestPending(ordinal, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, duration, formatter, location, payload, threadName, timeStamp) =>
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
+      case TestPending(
+            ordinal,
+            suiteName,
+            suiteId,
+            suiteClassName,
+            testName,
+            testText,
+            recordedEvents,
+            duration,
+            formatter,
+            location,
+            payload,
+            threadName,
+            timeStamp
+          ) =>
+        val qualifiedName = getQualifiedName(suiteId, suiteName, suiteClassName, testName, ordinal)
+        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, qualifiedName, location)
         listener.executionSkipped(testDesc, "Test pending.")
 
-      case SuiteAborted(ordinal, message, suiteName, suiteId, suiteClassName, throwable, duration, formatter, location, rerunnable, payload, threadName, timeStamp) =>
+      case SuiteAborted(
+            ordinal,
+            message,
+            suiteName,
+            suiteId,
+            suiteClassName,
+            throwable,
+            duration,
+            formatter,
+            location,
+            rerunnable,
+            payload,
+            threadName,
+            timeStamp
+          ) =>
         val throwableOrNull = throwable.orNull
         listener.executionFinished(clzDesc, TestExecutionResult.aborted(throwableOrNull))
 
-      case RunAborted(ordinal, message, throwable, duration, summary, formatter, location, payload, threadName, timeStamp) =>
+      case RunAborted(
+            ordinal,
+            message,
+            throwable,
+            duration,
+            summary,
+            formatter,
+            location,
+            payload,
+            threadName,
+            timeStamp
+          ) =>
         val throwableOrNull = throwable.orNull
         listener.executionFinished(engineDesc, TestExecutionResult.aborted(throwableOrNull))
 

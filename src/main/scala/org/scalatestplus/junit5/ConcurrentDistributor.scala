@@ -21,11 +21,11 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import java.util.concurrent.LinkedBlockingQueue
 
-/**
- * This Distributor can be used by multiple threads.
- *
- * @author Bill Venners
- */
+/** This Distributor can be used by multiple threads.
+  *
+  * @author
+  *   Bill Venners
+  */
 private[junit5] class ConcurrentDistributor(args: Args, execSvc: ExecutorService) extends Distributor {
 
   private val futureQueue = new LinkedBlockingQueue[Future[_]]
@@ -33,7 +33,7 @@ private[junit5] class ConcurrentDistributor(args: Args, execSvc: ExecutorService
   def apply(suite: Suite, tracker: Tracker): Unit = {
     apply(suite, args.copy(tracker = tracker))
   }
- 
+
   def apply(suite: Suite, args: Args): Status = {
     requireNonNull(suite, args)
     val status = new StatefulStatus

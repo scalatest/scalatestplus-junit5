@@ -21,100 +21,95 @@ import org.scalactic._
 import org.scalactic.exceptions.NullArgumentException
 import org.scalatest.exceptions.{StackDepthException, TestCanceledException}
 
-/**
- * Trait that contains ScalaTest's basic assertion methods, suitable for use with JUnit 5.
- *
- * <p>
- * The assertion methods provided in this trait look and behave exactly like the ones in
- * <a href="../Assertions.html"><code>Assertions</code></a>, except instead of throwing
- * <a href="../exceptions/TestFailedException.html"><code>TestFailedException</code></a> they throw
- * <a href="JUnitTestFailedError.html"><code>JUnitTestFailedError</code></a>,
- * which extends <code>org.opentest4j.AssertionFailedError</code>.
- *
- * <p>
- * JUnit 3 (release 3.8 and earlier) distinguishes between <em>failures</em> and <em>errors</em>.
- * If a test fails because of a failed assertion, that is considered a <em>failure</em>. If a test
- * fails for any other reason, either the test code or the application being tested threw an unexpected
- * exception, that is considered an <em>error</em>. The way JUnit 3 decides whether an exception represents
- * a failure or error is that only thrown <code>junit.framework.AssertionFailedError</code>s are considered
- * failures. Any other exception type is considered an error. The exception type thrown by the JUnit 3
- * assertion methods declared in <code>junit.framework.Assert</code> (such as <code>assertEquals</code>,
- * <code>assertTrue</code>, and <code>fail</code>) is, therefore, <code>AssertionFailedError</code>.
- * </p>
- *
- * <p>
- * In JUnit 4, <code>junit.framework.AssertionFailedError</code> was made to extend <code>java.lang.AssertionError</code>,
- * and the distinction between failures and errors was essentially dropped. However, some tools that integrate
- * with JUnit carry on this distinction, so even if you are using JUnit 4 you may want to use this
- * <code>AssertionsForJUnit</code> trait instead of plain-old ScalaTest
- * <a href="../Assertions.html"><code>Assertions</code></a>.
- * </p>
- *
- * <p>
- * In JUnit 5, <code>org.opentest4j.AssertionFailedError</code> is used as test-related AssertionError instead.
- * </p>
- *
- *
- * @author Bill Venners
- * @author Chua Chee Seng
- */
+/** Trait that contains ScalaTest's basic assertion methods, suitable for use with JUnit 5.
+  *
+  * <p> The assertion methods provided in this trait look and behave exactly like the ones in <a
+  * href="../Assertions.html"><code>Assertions</code></a>, except instead of throwing <a
+  * href="../exceptions/TestFailedException.html"><code>TestFailedException</code></a> they throw <a
+  * href="JUnitTestFailedError.html"><code>JUnitTestFailedError</code></a>, which extends
+  * <code>org.opentest4j.AssertionFailedError</code>.
+  *
+  * <p> JUnit 3 (release 3.8 and earlier) distinguishes between <em>failures</em> and <em>errors</em>. If a test fails
+  * because of a failed assertion, that is considered a <em>failure</em>. If a test fails for any other reason, either
+  * the test code or the application being tested threw an unexpected exception, that is considered an <em>error</em>.
+  * The way JUnit 3 decides whether an exception represents a failure or error is that only thrown
+  * <code>junit.framework.AssertionFailedError</code>s are considered failures. Any other exception type is considered
+  * an error. The exception type thrown by the JUnit 3 assertion methods declared in <code>junit.framework.Assert</code>
+  * (such as <code>assertEquals</code>, <code>assertTrue</code>, and <code>fail</code>) is, therefore,
+  * <code>AssertionFailedError</code>. </p>
+  *
+  * <p> In JUnit 4, <code>junit.framework.AssertionFailedError</code> was made to extend
+  * <code>java.lang.AssertionError</code>, and the distinction between failures and errors was essentially dropped.
+  * However, some tools that integrate with JUnit carry on this distinction, so even if you are using JUnit 4 you may
+  * want to use this <code>AssertionsForJUnit</code> trait instead of plain-old ScalaTest <a
+  * href="../Assertions.html"><code>Assertions</code></a>. </p>
+  *
+  * <p> In JUnit 5, <code>org.opentest4j.AssertionFailedError</code> is used as test-related AssertionError instead.
+  * </p>
+  *
+  * @author
+  *   Bill Venners
+  * @author
+  *   Chua Chee Seng
+  */
 trait AssertionsForJUnit extends VersionSpecificAssertionsForJUnit {
 
-  private[org] override def newAssertionFailedException(optionalMessage: Option[String], optionalCause: Option[Throwable], pos: source.Position, differences: scala.collection.immutable.IndexedSeq[String]): Throwable = {
+  private[org] override def newAssertionFailedException(
+      optionalMessage: Option[String],
+      optionalCause: Option[Throwable],
+      pos: source.Position,
+      differences: scala.collection.immutable.IndexedSeq[String]
+  ): Throwable = {
     new JUnitTestFailedError(optionalMessage, optionalCause, pos, None)
   }
 
-  private[org] override def newTestCanceledException(optionalMessage: Option[String], optionalCause: Option[Throwable], pos: source.Position): Throwable =
+  private[org] override def newTestCanceledException(
+      optionalMessage: Option[String],
+      optionalCause: Option[Throwable],
+      pos: source.Position
+  ): Throwable =
     new TestCanceledException(toExceptionFunction(optionalMessage), optionalCause, pos, None)
 
-  /**
-   * If message or message contents are null, throw a null exception, otherwise
-   * create a function that returns the option.
-   */
+  /** If message or message contents are null, throw a null exception, otherwise create a function that returns the
+    * option.
+    */
   def toExceptionFunction(message: Option[String]): StackDepthException => Option[String] = {
     message match {
-      case null => throw new NullArgumentException("message was null")
+      case null       => throw new NullArgumentException("message was null")
       case Some(null) => throw new NullArgumentException("message was a Some(null)")
-      case _ => { e => message }
+      case _          => { e => message }
     }
   }
 }
 
-/**
- * Companion object that facilitates the importing of <code>AssertionsForJUnit</code> members as
- * an alternative to mixing it in. One use case is to import <code>AssertionsForJUnit</code> members so you can use
- * them in the Scala interpreter:
- *
- * <pre>
- * sbt:junit-5.9> console
- * [info] Starting scala interpreter...
- * Welcome to Scala 2.13.10 (OpenJDK 64-Bit Server VM, Java 1.8.0_352).
- * Type in expressions for evaluation. Or try :help.
- *
- * scala> import org.scalatestplus.junit5.AssertionsForJUnit._
- * import org.scalatestplus.junit5.AssertionsForJUnit._
- *
- * scala> assert(1 === 2)
- * org.scalatestplus.junit5.JUnitTestFailedError: 1 did not equal 2
- *   at org.scalatestplus.junit5.AssertionsForJUnit.newAssertionFailedException(AssertionsForJUnit.scala:64)
- *    at org.scalatestplus.junit5.AssertionsForJUnit.newAssertionFailedException$(AssertionsForJUnit.scala:63)
- *    at org.scalatestplus.junit5.AssertionsForJUnit$.newAssertionFailedException(AssertionsForJUnit.scala:111)
- *    at org.scalatestplus.junit5.AssertionsForJUnit$AssertionsHelper.macroAssert(AssertionsForJUnit.scala:148)
- *   ... 35 elided
- * scala> val caught = intercept[StringIndexOutOfBoundsException] { "hi".charAt(-1) }
- * val caught: StringIndexOutOfBoundsException = java.lang.StringIndexOutOfBoundsException: String index out of range: -1
- * </pre>
- *
- * @author Bill Venners
- * @author Chua Chee Seng
- */
+/** Companion object that facilitates the importing of <code>AssertionsForJUnit</code> members as an alternative to
+  * mixing it in. One use case is to import <code>AssertionsForJUnit</code> members so you can use them in the Scala
+  * interpreter:
+  *
+  * <pre> sbt:junit-5.9> console [info] Starting scala interpreter... Welcome to Scala 2.13.10 (OpenJDK 64-Bit Server
+  * VM, Java 1.8.0_352). Type in expressions for evaluation. Or try :help.
+  *
+  * scala> import org.scalatestplus.junit5.AssertionsForJUnit._ import org.scalatestplus.junit5.AssertionsForJUnit._
+  *
+  * scala> assert(1 === 2) org.scalatestplus.junit5.JUnitTestFailedError: 1 did not equal 2 at
+  * org.scalatestplus.junit5.AssertionsForJUnit.newAssertionFailedException(AssertionsForJUnit.scala:64) at
+  * org.scalatestplus.junit5.AssertionsForJUnit.newAssertionFailedException$(AssertionsForJUnit.scala:63) at
+  * org.scalatestplus.junit5.AssertionsForJUnit$.newAssertionFailedException(AssertionsForJUnit.scala:111) at
+  * org.scalatestplus.junit5.AssertionsForJUnit$AssertionsHelper.macroAssert(AssertionsForJUnit.scala:148) ... 35 elided
+  * scala> val caught = intercept[StringIndexOutOfBoundsException] { "hi".charAt(-1) } val caught:
+  * StringIndexOutOfBoundsException = java.lang.StringIndexOutOfBoundsException: String index out of range: -1 </pre>
+  *
+  * @author
+  *   Bill Venners
+  * @author
+  *   Chua Chee Seng
+  */
 object AssertionsForJUnit extends AssertionsForJUnit {
 
   import Requirements._
 
-  /**
-   * Helper class used by code generated by the <code>assert</code> macro.
-   */
+  /** Helper class used by code generated by the <code>assert</code> macro.
+    */
   class AssertionsHelper {
 
     private def append(currentMessage: Option[String], clue: Any) = {
@@ -135,12 +130,14 @@ object AssertionsForJUnit extends AssertionsForJUnit {
       }
     }
 
-    /**
-     * Assert that the passed in <code>Bool</code> is <code>true</code>, else fail with <code>TestFailedException</code>.
-     *
-     * @param bool the <code>Bool</code> to assert for
-     * @param clue optional clue to be included in <code>TestFailedException</code>'s error message when assertion failed
-     */
+    /** Assert that the passed in <code>Bool</code> is <code>true</code>, else fail with
+      * <code>TestFailedException</code>.
+      *
+      * @param bool
+      *   the <code>Bool</code> to assert for
+      * @param clue
+      *   optional clue to be included in <code>TestFailedException</code>'s error message when assertion failed
+      */
     def macroAssert(bool: Bool, clue: Any, prettifier: Prettifier, pos: source.Position): Assertion = {
       requireNonNull(clue)(prettifier, pos)
       if (!bool.value) {
@@ -150,22 +147,26 @@ object AssertionsForJUnit extends AssertionsForJUnit {
       Succeeded
     }
 
-    /**
-     * Assert that the passed in <code>Bool</code> is <code>true</code>, else fail with <code>TestFailedException</code>.
-     *
-     * @param bool the <code>Bool</code> to assert for
-     * @param clue optional clue to be included in <code>TestFailedException</code>'s error message when assertion failed
-     * @param pos source position
-     */
+    /** Assert that the passed in <code>Bool</code> is <code>true</code>, else fail with
+      * <code>TestFailedException</code>.
+      *
+      * @param bool
+      *   the <code>Bool</code> to assert for
+      * @param clue
+      *   optional clue to be included in <code>TestFailedException</code>'s error message when assertion failed
+      * @param pos
+      *   source position
+      */
     def macroAssert(bool: Bool, clue: Any, pos: source.Position): Assertion =
       macroAssert(bool, clue, bool.prettifier, pos)
 
-    /**
-     * Assume that the passed in <code>Bool</code> is <code>true</code>, else throw <code>TestCanceledException</code>.
-     *
-     * @param bool the <code>Bool</code> to assume for
-     * @param clue optional clue to be included in <code>TestCanceledException</code>'s error message when assertion failed
-     */
+    /** Assume that the passed in <code>Bool</code> is <code>true</code>, else throw <code>TestCanceledException</code>.
+      *
+      * @param bool
+      *   the <code>Bool</code> to assume for
+      * @param clue
+      *   optional clue to be included in <code>TestCanceledException</code>'s error message when assertion failed
+      */
     def macroAssume(bool: Bool, clue: Any, prettifier: Prettifier, pos: source.Position): Assertion = {
       requireNonNull(clue)(prettifier, pos)
       if (!bool.value) {
@@ -175,20 +176,21 @@ object AssertionsForJUnit extends AssertionsForJUnit {
       Succeeded
     }
 
-    /**
-     * Assume that the passed in <code>Bool</code> is <code>true</code>, else throw <code>TestCanceledException</code>.
-     *
-     * @param bool the <code>Bool</code> to assume for
-     * @param clue optional clue to be included in <code>TestCanceledException</code>'s error message when assertion failed
-     * @param pos source position
-     */
+    /** Assume that the passed in <code>Bool</code> is <code>true</code>, else throw <code>TestCanceledException</code>.
+      *
+      * @param bool
+      *   the <code>Bool</code> to assume for
+      * @param clue
+      *   optional clue to be included in <code>TestCanceledException</code>'s error message when assertion failed
+      * @param pos
+      *   source position
+      */
     def macroAssume(bool: Bool, clue: Any, pos: source.Position): Assertion =
       macroAssume(bool, clue, bool.prettifier, pos)
   }
 
-  /**
-   * Helper instance used by code generated by macro assertion.
-   */
+  /** Helper instance used by code generated by macro assertion.
+    */
   val assertionsHelper = new AssertionsHelper
 
 }

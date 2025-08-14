@@ -29,7 +29,7 @@ package org.scalatestplus.junit5 {
     class HappySuite extends JUnitSuite {
 
       @Test def verifySomething(): Unit = () // Don't do nothin
-      //@Test def verifySomething2(): Unit = () // Don't do nothin// '
+      // @Test def verifySomething2(): Unit = () // Don't do nothin// '
     }
 
     class BitterSuite extends JUnitSuite {
@@ -138,7 +138,9 @@ package org.scalatestplus.junit5 {
       assert(repA.testIgnoredEvent.get.suiteClassName.get === "org.scalatestplus.junit5.helpers.IgnoredSuite")
     }
 
-    test("A JUnitSuite with two JUnit 5 Test annotations will cause TestStarting and TestSucceeded events to be fired twice each") {
+    test(
+      "A JUnitSuite with two JUnit 5 Test annotations will cause TestStarting and TestSucceeded events to be fired twice each"
+    ) {
 
       val many = new ManySuite
       val repA = new MyReporter

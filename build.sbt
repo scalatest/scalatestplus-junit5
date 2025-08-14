@@ -5,7 +5,7 @@ name := "junit-5.13"
 
 organization := "org.scalatestplus"
 
-version := "3.2.19.0"
+version := "3.2.19.1"
 
 homepage := Some(url("https://github.com/scalatest/scalatestplus-junit"))
 
@@ -32,7 +32,8 @@ crossScalaVersions := List(
   "2.11.12",
   "2.12.20",
   "2.13.16",
-  "3.3.5"
+  "3.3.6",
+  "3.7.1"
 )
 
 scalacOptions ++= Seq("-target:jvm-1.8")
@@ -42,7 +43,7 @@ Compile / unmanagedSourceDirectories ++= {
   val sourceDir = (Compile / sourceDirectory).value
   CrossVersion.partialVersion(scalaVersion.value).map {
     case (0 | 3, _) => sourceDir / "scala-3"
-    case (n, _) => sourceDir / s"scala-$n"
+    case (n, _)     => sourceDir / s"scala-$n"
   }
 }
 
@@ -69,24 +70,24 @@ import scala.xml.transform.{RewriteRule, RuleTransformer}
 pomPostProcess := { (node: XmlNode) =>
   new RuleTransformer(new RewriteRule {
     override def transform(node: XmlNode): XmlNodeSeq = node match {
-      case e: Elem if e.label == "dependency"
-          && e.child.exists(child => child.label == "scope") =>
+      case e: Elem
+          if e.label == "dependency"
+            && e.child.exists(child => child.label == "scope") =>
         def txt(label: String): String = "\"" + e.child.filter(_.label == label).flatMap(_.text).mkString + "\""
-        Comment(s""" scoped dependency ${txt("groupId")} % ${txt("artifactId")} % ${txt("version")} % ${txt("scope")} has been omitted """)
+        Comment(s""" scoped dependency ${txt("groupId")} % ${txt("artifactId")} % ${txt("version")} % ${txt(
+            "scope"
+          )} has been omitted """)
       case _ => node
     }
   }).transform(node).head
 }
 
 Test / testOptions :=
-  Seq(
-    Tests.Argument(TestFrameworks.ScalaTest,
-      "-m", "org.scalatestplus.junit5",
-    ))
+  Seq(Tests.Argument(TestFrameworks.ScalaTest, "-m", "org.scalatestplus.junit5"))
 
 Test / fork := true
 
-Test / javaOptions  +="-Dorg.scalatestplus.junit5.ScalaTestEngine.disabled=true"
+Test / javaOptions += "-Dorg.scalatestplus.junit5.ScalaTestEngine.disabled=true"
 
 enablePlugins(SbtOsgi)
 
@@ -98,12 +99,12 @@ OsgiKeys.exportPackage := Seq(
 
 OsgiKeys.importPackage := Seq(
   "org.scalatest.*",
-  "org.scalactic.*", 
-  "scala.*;version=\"$<range;[==,=+);$<replace;"+scalaBinaryVersion.value+";-;.>>\"",
+  "org.scalactic.*",
+  "scala.*;version=\"$<range;[==,=+);$<replace;" + scalaBinaryVersion.value + ";-;.>>\"",
   "*;resolution:=optional"
 )
 
-OsgiKeys.additionalHeaders:= Map(
+OsgiKeys.additionalHeaders := Map(
   "Bundle-Name" -> "ScalaTestPlusJUnit5",
   "Bundle-Description" -> "ScalaTest+JUnit5 is an open-source integration library between ScalaTest and JUnit 5 for Scala projects.",
   "Bundle-DocURL" -> "http://www.scalatest.org/",
@@ -134,7 +135,12 @@ pomExtra := (
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 // Temporary disable publishing of doc in dotty, can't get it to build.
-Compile / packageDoc / publishArtifact := !scalaBinaryVersion.value.startsWith("3")
+//Compile / packageDoc / publishArtifact := !scalaBinaryVersion.value.startsWith("3")
+Compile / packageDoc / publishArtifact := true
+Compile / packageSrc / publishArtifact := true
+
+publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
+publishM2Configuration := publishM2Configuration.value.withOverwrite(true)
 
 def docTask(docDir: File, resDir: File, projectName: String): File = {
   val docLibDir = docDir / "lib"
@@ -151,8 +157,7 @@ def docTask(docDir: File, resDir: File, projectName: String): File = {
     try {
       writer.println(css)
       writer.println(addlCss)
-    }
-    finally { writer.close }
+    } finally { writer.close }
   }
 
   if (projectName.contains("scalatest")) {
@@ -163,10 +168,13 @@ def docTask(docDir: File, resDir: File, projectName: String): File = {
   docDir
 }
 
-Compile / doc  := docTask((Compile / doc).value,
-                          (Compile / sourceDirectory).value,
-                          name.value)
+//Compile / doc := docTask((Compile / doc).value, (Compile / sourceDirectory).value, name.value)
 
-Compile / doc / scalacOptions := Seq("-doc-title", s"ScalaTest + JUnit5 ${version.value}", 
-                                       "-sourcepath", baseDirectory.value.getAbsolutePath(), 
-                                       "-doc-source-url", s"https://github.com/scalatest/releases-source/blob/main/scalatestplus-junit5/${version.value}€{FILE_PATH}.scala")
+Compile / doc / scalacOptions := Seq(
+  "-doc-title",
+  s"ScalaTest + JUnit5 ${version.value}",
+  "-sourcepath",
+  baseDirectory.value.getAbsolutePath(),
+  "-doc-source-url",
+  s"https://github.com/scalatest/releases-source/blob/main/scalatestplus-junit5/${version.value}€{FILE_PATH}.scala"
+)

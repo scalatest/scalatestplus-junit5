@@ -40,7 +40,7 @@ private[junit5] object JUnitHelper {
       else
         Map.empty[String, Set[String]]
 
-    mergeMap[String, Set[String]](List(tags, autoTestTags)) ( _ ++ _ )
+    mergeMap[String, Set[String]](List(tags, autoTestTags))(_ ++ _)
   }
 
   def getIndentedTextForTest(testText: String, level: Int, includeIcon: Boolean) = {
@@ -49,8 +49,7 @@ private[junit5] object JUnitHelper {
       if (includeIcon) {
         val testSucceededIcon = Resources.testSucceededIconChar()
         ("  " * (if (level == 0) 0 else (level - 1))) + Resources.iconPlusShortName(testSucceededIcon, decodedTestText)
-      }
-      else {
+      } else {
         ("  " * level) + decodedTestText
       }
     IndentedText(formattedText, decodedTestText, level)
@@ -62,8 +61,7 @@ private[junit5] object JUnitHelper {
       val constructor = clazz.getConstructor(new Array[java.lang.Class[_]](0): _*)
 
       Modifier.isPublic(constructor.getModifiers)
-    }
-    catch {
+    } catch {
       case nsme: NoSuchMethodException => false
     }
   }
