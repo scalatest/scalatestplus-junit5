@@ -82,7 +82,7 @@ class DSuite extends JUnitSuite {
   @Test def doTwo(): Unit = ()
   @Test def doIt(): Unit = ()
   @Test def doFour(): String = "hi" // JUnit will not run these two because they don't
-  @Test def doFive(): Int = 5       // have result type Unit.
+  @Test def doFive(): Int = 5 // have result type Unit.
 }
 
 class ESuite extends JUnitSuite {
