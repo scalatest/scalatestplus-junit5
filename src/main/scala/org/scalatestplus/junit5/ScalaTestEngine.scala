@@ -281,7 +281,7 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
                   excludeNestedSuites = false,
                   dynaTags = DynaTags(Map.empty, Map(suiteToRun.suiteId -> Map.empty))
                 )
-              if (suiteToRun.testNames.size == children.size)  // When testNames size is same as children size, it means all tests are selected, so no need to apply filter, this solves the issue of dynamic test names when running suite.
+              else if (suiteToRun.testNames.size == children.size)  // When testNames size is same as children size, it means all tests are selected, so no need to apply filter, this solves the issue of dynamic test names when running suite.
                 Filter.default
               else {
                 val SelectedTag = "Selected"

@@ -1,11 +1,12 @@
 package org.scalatestplus.junit5
 
-import org.junit.platform.engine.UniqueId
+import org.junit.platform.engine.{TestExecutionResult, UniqueId}
 import org.junit.platform.engine.discovery.ClasspathRootSelector
-import org.junit.platform.engine.discovery.DiscoverySelectors.{selectClasspathRoots, selectPackage}
+import org.junit.platform.engine.discovery.DiscoverySelectors.{selectClass, selectClasspathRoots, selectPackage}
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request
 import org.scalatest.{BeforeAndAfterAll, funspec}
 import org.scalatestplus.junit5.helpers.HappySuite
+
 
 import java.nio.file.{Files, Paths}
 import scala.collection.JavaConverters._
@@ -59,6 +60,20 @@ class ScalaTestEngineSpec extends funspec.AnyFunSpec with BeforeAndAfterAll {
 
         val engineDescriptor = engine.discover(discoveryRequest, UniqueId.forEngine(engine.getId()))
         assert(engineDescriptor.getChildren.asScala.isEmpty)
+      }
+    }
+
+    describe("execute method") {
+      it("should discover suite with no children when selected by class-level UniqueId") {
+        val engineId = UniqueId.forEngine(engine.getId())
+        val suiteUniqueId = engineId.append(ScalaTestClassDescriptor.segmentType, classOf[HappySuite].getName)
+        val discoveryRequest = request.selectors(
+          org.junit.platform.engine.discovery.DiscoverySelectors.selectUniqueId(suiteUniqueId)
+        ).build()
+        val engineDescriptor = engine.discover(discoveryRequest, engineId)
+
+        val suiteDesc = engineDescriptor.getChildren.asScala.head.asInstanceOf[ScalaTestClassDescriptor]
+        assert(suiteDesc.getChildren.asScala.isEmpty)
       }
     }
   }
