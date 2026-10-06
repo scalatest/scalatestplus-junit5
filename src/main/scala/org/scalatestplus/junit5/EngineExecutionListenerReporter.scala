@@ -16,8 +16,10 @@
 package org.scalatestplus.junit5
 
 import org.junit.platform.engine.{EngineExecutionListener, TestDescriptor, TestExecutionResult, UniqueId}
+import org.scalactic.source
 import org.scalatest.{Resources => _, _}
 import org.scalatest.events._
+import org.scalatest.exceptions.TestFailedException
 
 private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionListener, clzDesc: ScalaTestClassDescriptor, engineDesc: TestDescriptor) extends Reporter {
 
@@ -48,6 +50,24 @@ private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionL
     new ScalaTestDescriptor(uniqueId, testName, locationOpt)
   }
 
+  // Report a ScalaTest assertion failure as a JUnitTestFailedError, an opentest4j AssertionFailedError, so
+  // that it is classified as a failure rather than an error and carries the event's message, which for some
+  // failures, a property check for instance, is the only place the detail exists. Others pass through.
+  private def throwableToReport(message: String, throwable: Option[Throwable]): Throwable =
+    throwable match {
+      case Some(tfe: TestFailedException) =>
+        val posOrStackDepth: Either[source.Position, Int] =
+          tfe.position match {
+            case Some(pos) => Left(pos)
+            case None => Right(tfe.failedCodeStackDepth)
+          }
+        val error = new JUnitTestFailedError(Some(message), tfe.cause, posOrStackDepth, tfe.payload)
+        error.setStackTrace(tfe.getStackTrace)
+        tfe.getSuppressed.foreach(s => error.addSuppressed(s))
+        error
+      case other => other.orNull
+    }
+
   override def apply(event: Event): Unit = {
 
     event match {
@@ -59,9 +79,8 @@ private[junit5] class EngineExecutionListenerReporter(listener: EngineExecutionL
         listener.executionStarted(testDesc)
 
       case TestFailed(ordinal, message, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, analysis, throwable, duration, formatter, location, rerunnable, payload, threadName, timeStamp) =>
-        val throwableOrNull = throwable.orNull
         val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
-        listener.executionFinished(testDesc, TestExecutionResult.failed(throwableOrNull))
+        listener.executionFinished(testDesc, TestExecutionResult.failed(throwableToReport(message, throwable)))
 
       case TestSucceeded(ordinal, suiteName, suiteId, suiteClassName, testName, testText, recordedEvents, duration, formatter, location, rerunnable, payload, threadName, timeStamp) =>
         val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
